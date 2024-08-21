@@ -21,16 +21,6 @@ function galleryImageFormatter(value) {
     }
 }
 
-function subCategoryFormatter(value, row) {
-    let url = `/category/${row.id}/subcategories`;
-    return '<a href="' + url + '"> <div class="category_count">' + value + ' Sub Categories</div></a>';
-}
-
-function customFieldFormatter(value, row) {
-    let url = `/category/${row.id}/custom-fields`;
-    return '<a href="' + url + '"> <div class="category_count">' + value + ' Custom Fields</div></a>';
-
-}
 
 function statusSwitchFormatter(value, row) {
     return `<div class="form-check form-switch">

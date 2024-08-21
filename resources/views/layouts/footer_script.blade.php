@@ -50,7 +50,7 @@
 <script type="text/javascript" src="{{ asset('assets/extensions/filepond/filepond-plugin-image-validate-size.min.js') }}"></script>
 
 {{--JS Tree--}}
-<script src="{{asset("assets/extensions/jstree/jstree.min.js")}}"></script>
+<script src="{{asset('assets/extensions/jstree/jstree.min.js')}}"></script>
 
 
 {{-- Custom JS --}}
@@ -60,7 +60,19 @@
 <script type="text/javascript" src="{{ asset('assets/js/custom/bootstrap-table/formatter.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/custom/bootstrap-table/queryParams.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/custom/bootstrap-table/actionEvents.js') }}"></script>
+<script>
+    function subCategoryFormatter(value, row) {
+        let url = `<?=url("")?>/category/${row.id}/subcategories`;
+        return '<a href="' + url + '"> <div class="category_count">' + value + ' Sub Categories</div></a>';
+    }
 
+    function customFieldFormatter(value, row) {
+        let url = `<?=url("")?>/category/${row.id}/custom-fields`;
+        return '<a href="' + url + '"> <div class="category_count">' + value + ' Custom Fields</div></a>';
+
+    }
+
+</script>
 
 {{--Bootstrap Table--}}
 <script type="text/javascript" src="{{ asset('assets/extensions/bootstrap-table/bootstrap-table.min.js') }}"></script>
