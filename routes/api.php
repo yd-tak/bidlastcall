@@ -20,6 +20,8 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
     Route::post('update-profile', [ApiController::class, 'updateProfile']);
     Route::delete('delete-user', [ApiController::class, 'deleteUser']);
 
+    Route::get('bidcoin-balances', [ApiController::class, 'getBidcoinBalances']);
+
     Route::get('my-items', [ApiController::class, 'getItem']);
     Route::post('add-item', [ApiController::class, 'addItem']);
     Route::post('update-item', [ApiController::class, 'updateItem']);

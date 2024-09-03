@@ -284,7 +284,11 @@ class ApiController extends Controller {
             ResponseService::errorResponse();
         }
     }
-
+    public function getBidcoinBalances(Request $request){
+        $user = Auth::user();
+        $balances=DB::table('bidcoin_balances')->where('user_id',$user->id)->orderBy('created_at')->get();
+        ResponseService::successResponse('Data Fetched Successfully', $balances);
+    }
     public function addItem(Request $request) {
         try {
             $validator = Validator::make($request->all(), [
