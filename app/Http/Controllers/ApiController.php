@@ -377,8 +377,15 @@ class ApiController extends Controller {
             }
 
             $item = Item::create($data);
-            
-            BidcoinBalance::credit($user->id,$category->cost,'Listing '.$request->name,'api/add-item',$item->id);
+
+            BidcoinBalance::create([
+                'user_id'=>$user->id,
+                'debit'=>0,
+                'credit'=>$category->cost,
+                'trx'=>'api/add-item',
+                'trx_id'=>$item->id,
+                'notes'=>'Listing '.$request->name
+            ]);
 
             if ($request->hasFile('gallery_images')) {
                 $galleryImages = [];

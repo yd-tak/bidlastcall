@@ -19,23 +19,4 @@ class BidcoinBalance extends Model {
         'trx_id',
         'notes'
     ];
-
-    public function debit($user_id,$amount,$notes,$trx,$trx_id) {
-        return $this->create([
-            'user_id'=>$user_id,
-            'debit'=>$amount,
-            'credit'=>0,
-            'trx'=>$trx,
-            'trx_id'=>$trx_id
-        ]);   
-    }
-    public function credit($user_id,$amount,$notes,$trx,$trx_id) {
-        return $this->create([
-            'user_id'=>$user_id,
-            'debit'=>0,
-            'credit'=>$amount,
-            'trx'=>$trx,
-            'trx_id'=>$trx_id
-        ]);   
-    }
 }
