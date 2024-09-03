@@ -344,9 +344,9 @@ class ApiController extends Controller {
                 'contact'              => 'numeric|min:10',
                 'show_only_to_premium' => 'required|boolean',
                 'video_link'           => 'nullable|url',
-                'gallery_images'       => 'nullable|array|min:1',
-                'gallery_images.*'     => 'nullable|mimes:jpeg,png,jpg|max:4096',
-                'image'                => 'required|mimes:jpeg,png,jpg|max:4096',
+                // 'gallery_images'       => 'nullable|array|min:1',
+                // 'gallery_images.*'     => 'nullable|mimes:jpeg,png,jpg|max:4096',
+                // 'image'                => 'required|mimes:jpeg,png,jpg|max:4096',
                 'country'              => 'required',
                 'state'                => 'nullable',
                 'city'                 => 'required',
@@ -377,7 +377,7 @@ class ApiController extends Controller {
             }
 
             $item = Item::create($data);
-
+            
             BidcoinBalance::credit($user->id,$category->cost,'Listing '.$request->name,'api/add-item',$item->id);
 
             if ($request->hasFile('gallery_images')) {
