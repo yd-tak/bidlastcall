@@ -21,7 +21,7 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
     Route::post('update-profile', [ApiController::class, 'updateProfile']);
     Route::delete('delete-user', [ApiController::class, 'deleteUser']);
 
-    Route::get('get-bidcoin-package', [ApiController::class, 'getBidcoinPackage']);
+    Route::get('get-bidcoin-package', [ApiController::class, 'getBidcoinPackages']);
     Route::get('bidcoin-balances', [ApiController::class, 'getBidcoinBalances']);
     Route::get('purchase-bidcoin', [ApiController::class, 'purchaseBidcoin']);
 
@@ -59,7 +59,7 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
 
 /* Non Authenticated Routes */
 // Route::get('get-package', [ApiController::class, 'getPackage']);
-Route::get('get-bidcoin-package', [ApiController::class, 'getBidcoinPackage']);
+Route::get('get-bidcoin-package', [ApiController::class, 'getBidcoinPackages']);
 Route::get('get-languages', [ApiController::class, 'getLanguages']);
 Route::post('user-signup', [ApiController::class, 'userSignup']);
 Route::post('set-item-total-click', [ApiController::class, 'setItemTotalClick']);
