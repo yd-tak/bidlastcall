@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ItemCollection;
 use App\Models\Area;
+use App\Models\BidcoinBalance;
 use App\Models\BlockUser;
 use App\Models\Blog;
 use App\Models\Category;
@@ -287,7 +288,18 @@ class ApiController extends Controller {
     public function getBidcoinBalances(Request $request){
         $user = Auth::user();
         $balances=DB::table('bidcoin_balances')->where('user_id',$user->id)->orderBy('created_at')->get();
-        ResponseService::successResponse('Data Fetched Successfully', $balances);
+        $curr=0;
+        foreach($balances as $row){
+            $close=$curr+$row->debit-$row->credit;
+            $row->open=$curr;
+            $row->close=$close;
+            $curr=$close;
+
+        }
+        ResponseService::successResponse('Data Fetched Successfully', [
+            'balances'=>$balances,
+            'currbalance'=>$curr
+        ]);
     }
     public function addItem(Request $request) {
         try {
@@ -318,16 +330,7 @@ class ApiController extends Controller {
 
             DB::beginTransaction();
             $user = Auth::user();
-            $user_package = UserPurchasedPackage::onlyActive()->whereHas('package', static function ($q) {
-                $q->where('type', 'item_listing');
-            })->where('user_id', $user->id)->first();
-
-            if (empty($user_package)) {
-                ResponseService::errorResponse("No Active Package found for Item Creation");
-            }
-
-            ++$user_package->used_limit;
-            $user_package->save();
+            $category=Category::where('category_id',$request->category_id)->first();
 
             $data = [
                 ...$request->all(),
@@ -336,7 +339,7 @@ class ApiController extends Controller {
                 'status'     => "review", //review,approve,reject
                 'active'     => "deactive", //active/deactive
                 'user_id'    => $user->id,
-                'package_id' => $user_package->package_id,
+                'cost'       => $category->cost
             ];
 
             if ($request->hasFile('image')) {
@@ -344,6 +347,8 @@ class ApiController extends Controller {
             }
 
             $item = Item::create($data);
+
+            BidcoinBalance::credit($user->id,$category->cost,'Listing '.$request->name,'api/add-item',$item->id);
 
             if ($request->hasFile('gallery_images')) {
                 $galleryImages = [];
