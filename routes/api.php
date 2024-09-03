@@ -16,11 +16,14 @@ use Illuminate\Support\Facades\Route;
 
 /* Authenticated Routes */
 Route::group(['middleware' => ['auth:sanctum']], static function () {
-    Route::get('get-package', [ApiController::class, 'getPackage']);
+    // Route::get('get-package', [ApiController::class, 'getPackage']);
+    
     Route::post('update-profile', [ApiController::class, 'updateProfile']);
     Route::delete('delete-user', [ApiController::class, 'deleteUser']);
 
+    Route::get('get-bidcoin-package', [ApiController::class, 'getBidcoinPackage']);
     Route::get('bidcoin-balances', [ApiController::class, 'getBidcoinBalances']);
+    Route::get('purchase-bidcoin', [ApiController::class, 'purchaseBidcoin']);
 
     Route::get('my-items', [ApiController::class, 'getItem']);
     Route::post('add-item', [ApiController::class, 'addItem']);
@@ -34,19 +37,19 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
     Route::post('add-reports', [ApiController::class, 'addReports']);
     Route::get('get-notification-list', [ApiController::class, 'getNotificationList']);
     Route::get('get-limits', [ApiController::class, 'getLimits']);
-    Route::get('get-favourite-item', [ApiController::class, 'getFavouriteItem']);
+    Route::get('get-favourite-item', [ApiController::class, 'getFavouriteItem']);//ini
 
     Route::get('get-payment-settings', [ApiController::class, 'getPaymentSettings']);
     Route::post('payment-intent', [ApiController::class, 'getPaymentIntent']);
-    Route::get('payment-transactions', [ApiController::class, 'getPaymentTransactions']);
+    Route::get('payment-transactions', [ApiController::class, 'getPaymentTransactions']);//ini
 
     /*Chat Module*/
-    Route::post('item-offer', [ApiController::class, 'createItemOffer']);
-    Route::get('chat-list', [ApiController::class, 'getChatList']);
-    Route::post('send-message', [ApiController::class, 'sendMessage']);
-    Route::get('chat-messages', [ApiController::class, 'getChatMessages']);
+    // Route::post('item-offer', [ApiController::class, 'createItemOffer']);
+    // Route::get('chat-list', [ApiController::class, 'getChatList']);
+    // Route::post('send-message', [ApiController::class, 'sendMessage']);
+    // Route::get('chat-messages', [ApiController::class, 'getChatMessages']);
 
-    Route::post('in-app-purchase', [ApiController::class, 'inAppPurchase']);
+    // Route::post('in-app-purchase', [ApiController::class, 'inAppPurchase']);
 
     Route::post('block-user', [ApiController::class, 'blockUser']);
     Route::post('unblock-user', [ApiController::class, 'unblockUser']);
@@ -55,7 +58,8 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
 
 
 /* Non Authenticated Routes */
-Route::get('get-package', [ApiController::class, 'getPackage']);
+// Route::get('get-package', [ApiController::class, 'getPackage']);
+Route::get('get-bidcoin-package', [ApiController::class, 'getBidcoinPackage']);
 Route::get('get-languages', [ApiController::class, 'getLanguages']);
 Route::post('user-signup', [ApiController::class, 'userSignup']);
 Route::post('set-item-total-click', [ApiController::class, 'setItemTotalClick']);

@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ItemCollection;
 use App\Models\Area;
 use App\Models\BidcoinBalance;
+use App\Models\BidcoinPackage;
+use App\Models\BidcoinPurchase;
 use App\Models\BlockUser;
 use App\Models\Blog;
 use App\Models\Category;
@@ -294,14 +296,42 @@ class ApiController extends Controller {
             $row->open=$curr;
             $row->close=$close;
             $curr=$close;
-
         }
         ResponseService::successResponse('Data Fetched Successfully', [
             'balances'=>$balances,
             'currbalance'=>$curr
         ]);
     }
+    public function getBidcoinPackages(Request $request){
+        $packages=DB::table('bidcoin_packages')->where('status',1)->orderBy('id')->get();
+        ResponseService::successResponse('Data Fetched Successfully', $packages);
+    }
+    public function purchaseBidcoin(Request $request){
+        DB::beginTransaction();
+        $user = Auth::user();
+        $package=BidcoinPackage::where('id',$request->bidcoin_package_id)->first();
+        $img=null;
+        if ($request->hasFile('uploadProof')) {
+            $galleryImages = [];
+            $img=$request->file('uploadProof');
+            $img=FileService::compressAndUpload($img,$this->uploadFolder);
+        }
+
+        $purchase=BidcoinPurchase::create([
+            'user_id'=>$request->user_id,
+            'bidcoin_package_id'=>$request->bidcoin_package_id,
+            'price'=>$package->price,
+            'bidcoin'=>$package->bidcoin,
+            'status'=>'review',
+            'img'=>$img
+        ]);
+
+        DB::commit();
+        ResponseService::successResponse('Data Inserted Successfully');
+    }
+    
     public function addItem(Request $request) {
+        //bidprice, startbidprice, multiplebidprice, startbid, enddate
         try {
             $validator = Validator::make($request->all(), [
                 'name'                 => 'required',
@@ -330,7 +360,7 @@ class ApiController extends Controller {
 
             DB::beginTransaction();
             $user = Auth::user();
-            $category=Category::where('category_id',$request->category_id)->first();
+            $category=Category::where('id',$request->category_id)->first();
 
             $data = [
                 ...$request->all(),
