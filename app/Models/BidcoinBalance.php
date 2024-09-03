@@ -20,8 +20,8 @@ class BidcoinBalance extends Model {
         'notes'
     ];
 
-    public static function debit($user_id,$amount,$notes,$trx,$trx_id) {
-        return $this->insert([
+    public function debit($user_id,$amount,$notes,$trx,$trx_id) {
+        return $this->create([
             'user_id'=>$user_id,
             'debit'=>$amount,
             'credit'=>0,
@@ -29,8 +29,8 @@ class BidcoinBalance extends Model {
             'trx_id'=>$trx_id
         ]);   
     }
-    public static function credit($user_id,$amount,$notes,$trx,$trx_id) {
-        return $this->insert([
+    public function credit($user_id,$amount,$notes,$trx,$trx_id) {
+        return $this->create([
             'user_id'=>$user_id,
             'debit'=>0,
             'credit'=>$amount,
