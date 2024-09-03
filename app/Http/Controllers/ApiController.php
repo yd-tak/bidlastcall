@@ -318,7 +318,7 @@ class ApiController extends Controller {
         }
 
         $purchase=BidcoinPurchase::create([
-            'user_id'=>$request->user_id,
+            'user_id'=>$user->id,
             'bidcoin_package_id'=>$request->bidcoin_package_id,
             'price'=>$package->price,
             'bidcoin'=>$package->bidcoin,
