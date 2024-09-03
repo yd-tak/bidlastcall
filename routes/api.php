@@ -23,7 +23,7 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
 
     Route::get('get-bidcoin-package', [ApiController::class, 'getBidcoinPackages']);
     Route::get('bidcoin-balances', [ApiController::class, 'getBidcoinBalances']);
-    Route::get('purchase-bidcoin', [ApiController::class, 'purchaseBidcoin']);
+    Route::post('purchase-bidcoin', [ApiController::class, 'purchaseBidcoin']);
 
     Route::get('my-items', [ApiController::class, 'getItem']);
     Route::post('add-item', [ApiController::class, 'addItem']);
