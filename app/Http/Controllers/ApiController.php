@@ -323,6 +323,9 @@ class ApiController extends Controller {
             'price'=>$package->price,
             'bidcoin'=>$package->bidcoin,
             'status'=>'review',
+            'accountname'=>$request->accountname,
+            'accountnum'=>$request->accountnum,
+            'bank'=>$request->bank,
             'img'=>$img
         ]);
 

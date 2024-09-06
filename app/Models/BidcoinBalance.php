@@ -17,6 +17,9 @@ class BidcoinBalance extends Model {
         'credit',
         'trx',
         'trx_id',
+        'bank',
+        'accountname',
+        'accountnum',
         'notes'
     ];
 }
