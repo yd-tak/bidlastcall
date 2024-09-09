@@ -342,6 +342,7 @@ class ApiController extends Controller {
             'last_price'=>$item->startbid
         ]));
         fclose($file);
+        ResponseService::successResponse("Bid Opened", $item);
     }
     public function bidItem(Request $request){
         try {
@@ -380,6 +381,7 @@ class ApiController extends Controller {
             ]);
             $updateItem['winnerbidid']=$itembid->id;
             Item::where('id',$request->item_id)->save($updateItem);
+            ResponseService::successResponse("Bid Success", $item);
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
