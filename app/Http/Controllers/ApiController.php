@@ -391,8 +391,10 @@ class ApiController extends Controller {
             fwrite($file,json_encode($item));
             fclose($file);
             
-            ResponseService::successResponse("Bid Success", $item);
             DB::commit();
+
+            ResponseService::successResponse("Bid Success", $item);
+            
         } catch (\Exception $e) {
             DB::rollBack();
             // ResponseService::logErrorResponse($e, "API Controller -> bidItem");
