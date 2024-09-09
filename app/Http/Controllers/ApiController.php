@@ -352,7 +352,7 @@ class ApiController extends Controller {
             $item=json_decode($itemfile);
             $user = Auth::user();
             $now=date("Y-m-d H:i:s");
-            $bidtimelimitdt=new DateTime($item->time_limit);
+            $bidtimelimitdt=new \DateTime($item->time_limit);
             $bidtimelimitdt->modify("-1 minute");
             $extendlimitdt=$bidtimelimitdt->format("Y-m-d H:i:s");
             if($now>$item->bidtimelimit){
@@ -364,7 +364,7 @@ class ApiController extends Controller {
             $file=fopen($filepath,"w");
             $updateItem=[];
             if($now>$extendlimitdt){
-                $newtimelimitdt=new DateTime($item->time_limit);
+                $newtimelimitdt=new \DateTime($item->time_limit);
                 $newtimelimitdt->modify("+1 minute");
                 $item->time_limit=$newtimelimitdt->format("Y-m-d");
                 $updateItem['enddt']=$item->time_limit;
