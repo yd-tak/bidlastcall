@@ -361,7 +361,7 @@ class ApiController extends Controller {
             if($request->bid_price<=$item->last_price){
                 throw new \Exception("Tidak dapat memasang bid, harga sudah berubah");
             }
-            $file=fopen($filepath,"w");
+            
             $updateItem=[];
             if($now>$extendlimitdt){
                 $newtimelimitdt=new \DateTime($item->time_limit);
@@ -370,8 +370,6 @@ class ApiController extends Controller {
                 $updateItem['enddt']=$item->time_limit;
             }
             $item->last_price=$request->bid_price;
-            fwrite($file,json_encode($item));
-            fclose($file);
             $itembid=ItemBid::create([
                 'user_id'=>$user->id,
                 'item_id'=>$request->item_id,
@@ -380,7 +378,19 @@ class ApiController extends Controller {
                 'bid_dt'=>$now
             ]);
             $updateItem['winnerbidid']=$itembid->id;
-            Item::where('id',$request->item_id)->save($updateItem);
+            $itemdb=Item::where('id',$request->item_id)->first();
+            if(isset($updateItem['winnerbidid'])){
+                $itemdb->winnerbidid=$updateItem['winnerbidid'];
+            }
+            if(isset($updateItem['enddt'])){
+                $itemdb->enddt=$updateItem['enddt'];
+            }
+            $itemdb->save($updateItem);
+
+            $file=fopen($filepath,"w");
+            fwrite($file,json_encode($item));
+            fclose($file);
+            
             ResponseService::successResponse("Bid Success", $item);
             DB::commit();
         } catch (\Exception $e) {
