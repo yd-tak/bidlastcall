@@ -356,10 +356,10 @@ class ApiController extends Controller {
             $bidtimelimitdt->modify("-1 minute");
             $extendlimitdt=$bidtimelimitdt->format("Y-m-d H:i:s");
             if($now>$item->time_limit){
-                throw new Exception("Tidak dapat memasang bid, waktu BID sudah HABIS");
+                throw new \Exception("Tidak dapat memasang bid, waktu BID sudah HABIS");
             }
             if($request->bid_price<=$item->last_price){
-                throw new Exception("Tidak dapat memasang bid, harga sudah berubah");
+                throw new \Exception("Tidak dapat memasang bid, harga sudah berubah");
             }
             $file=fopen($filepath,"w");
             $updateItem=[];
