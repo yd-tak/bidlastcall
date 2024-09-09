@@ -15,8 +15,9 @@ class ItemBid extends Model {
     protected $fillable = [
         'user_id',
         'item_id',
-        'bidamount',
-        'bidprice',
-        'biddt'
+        'bid_amount',
+        'bid_price',
+        'created_at',
+        'updated_at'
     ];
 }
