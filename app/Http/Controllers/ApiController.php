@@ -334,6 +334,7 @@ class ApiController extends Controller {
         ResponseService::successResponse('Data Inserted Successfully');
     }
     public function writeBid(Request $request){
+        $filepath=public_path('items/'.$request->item_id.'.json');
         $item=Item::where('id',$request->item_id)->first();
         $file=fopen($filepath,"w");
         fwrite($file,json_encode([
@@ -500,6 +501,7 @@ class ApiController extends Controller {
             $result = Item::with('user:id,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area')->where('id', $item->id)->get();
             $result = new ItemCollection($result);
 
+            $filepath=public_path('items/'.$item->id.'.json');
             $file=fopen($filepath,"w");
             fwrite($file,json_encode([
                 'time_limit'=>$item->enddt,
