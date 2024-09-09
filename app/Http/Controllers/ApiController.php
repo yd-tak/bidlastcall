@@ -355,7 +355,7 @@ class ApiController extends Controller {
             $bidtimelimitdt=new \DateTime($item->time_limit);
             $bidtimelimitdt->modify("-1 minute");
             $extendlimitdt=$bidtimelimitdt->format("Y-m-d H:i:s");
-            if($now>$item->bidtimelimit){
+            if($now>$item->time_limit){
                 throw new Exception("Tidak dapat memasang bid, waktu BID sudah HABIS");
             }
             if($request->bid_price<=$item->last_price){
