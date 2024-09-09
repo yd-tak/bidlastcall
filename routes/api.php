@@ -30,6 +30,8 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
     Route::post('update-item', [ApiController::class, 'updateItem']);
     Route::post('delete-item', [ApiController::class, 'deleteItem']);
     Route::post('update-item-status', [ApiController::class, 'updateItemStatus']);
+    Route::post('bid-item', [ApiController::class, 'bidItem']);
+
 
     Route::post('assign-free-package', [ApiController::class, 'assignFreePackage']);
     Route::post('make-item-featured', [ApiController::class, 'makeFeaturedItem']);
@@ -59,6 +61,7 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
 
 /* Non Authenticated Routes */
 // Route::get('get-package', [ApiController::class, 'getPackage']);
+Route::post('write-bid', [ApiController::class, 'writeBid']);
 Route::get('get-bidcoin-package', [ApiController::class, 'getBidcoinPackages']);
 Route::get('get-languages', [ApiController::class, 'getLanguages']);
 Route::post('user-signup', [ApiController::class, 'userSignup']);

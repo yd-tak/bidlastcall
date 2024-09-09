@@ -21,6 +21,7 @@ use App\Models\Favourite;
 use App\Models\FeaturedItems;
 use App\Models\FeatureSection;
 use App\Models\Item;
+use App\Models\ItemBid;
 use App\Models\ItemCustomFieldValue;
 use App\Models\ItemImages;
 use App\Models\ItemOffer;
@@ -332,7 +333,59 @@ class ApiController extends Controller {
         DB::commit();
         ResponseService::successResponse('Data Inserted Successfully');
     }
-    
+    public function writeBid(Request $request){
+        $item=Item::where('id',$request->item_id)->first();
+        $file=fopen($filepath,"w");
+        fwrite($file,json_encode([
+            'time_limit'=>$item->enddt,
+            'last_price'=>$item->startbid
+        ]));
+        fclose($file);
+    }
+    public function bidItem(Request $request){
+        try {
+            DB::beginTransaction();
+            $filepath=public_path('items/'.$request->item_id.'.json');
+            $itemfile=file_get_contents($filepath);
+            $item=json_decode($itemfile);
+            $user = Auth::user();
+            $now=date("Y-m-d H:i:s");
+            $bidtimelimitdt=new DateTime($item->time_limit);
+            $bidtimelimitdt->modify("-1 minute");
+            $extendlimitdt=$bidtimelimitdt->format("Y-m-d H:i:s");
+            if($now>$item->bidtimelimit){
+                throw new Exception("Tidak dapat memasang bid, waktu BID sudah HABIS");
+            }
+            if($request->bid_price<=$item->last_price){
+                throw new Exception("Tidak dapat memasang bid, harga sudah berubah");
+            }
+            $file=fopen($filepath,"w");
+            $updateItem=[];
+            if($now>$extendlimitdt){
+                $newtimelimitdt=new DateTime($item->time_limit);
+                $newtimelimitdt->modify("+1 minute");
+                $item->time_limit=$newtimelimitdt->format("Y-m-d");
+                $updateItem['enddt']=$item->time_limit;
+            }
+            $item->last_price=$request->bid_price;
+            fwrite($file,json_encode($item));
+            fclose($filepath);
+            $itembid=ItemBid::create([
+                'user_id'=>$user->id,
+                'item_id'=>$request->item_id,
+                'bid_amount'=>$request->bid_amount,
+                'bid_price'=>$request->bid_price,
+                'bid_dt'=>$now
+            ]);
+            $updateItem['winnerbidid']=$itembid->id;
+            Item::where('id',$request->item_id)->save($updateItem);
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            ResponseService::logErrorResponse($e, "API Controller -> bidItem");
+            ResponseService::errorResponse();
+        }
+    }
     public function addItem(Request $request) {
         //bidprice, startbidprice, multiplebidprice, startbid, enddate
         try {
@@ -347,6 +400,10 @@ class ApiController extends Controller {
                 'contact'              => 'numeric|min:10',
                 'show_only_to_premium' => 'required|boolean',
                 'video_link'           => 'nullable|url',
+                'stdt'                 => 'required',
+                'endt'                 => 'required',
+                'openbid'              => 'required|integer',
+                'minbid'               => 'required|integer',
                 // 'gallery_images'       => 'nullable|array|min:1',
                 // 'gallery_images.*'     => 'nullable|mimes:jpeg,png,jpg|max:4096',
                 // 'image'                => 'required|mimes:jpeg,png,jpg|max:4096',
@@ -442,6 +499,13 @@ class ApiController extends Controller {
 
             $result = Item::with('user:id,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area')->where('id', $item->id)->get();
             $result = new ItemCollection($result);
+
+            $file=fopen($filepath,"w");
+            fwrite($file,json_encode([
+                'time_limit'=>$item->enddt,
+                'last_price'=>$item->startbid
+            ]));
+            fclose($file);
 
             DB::commit();
             ResponseService::successResponse("Item Added Successfully", $result);
