@@ -405,7 +405,7 @@ class ApiController extends Controller {
                 'video_link'           => 'nullable|url',
                 'stdt'                 => 'required',
                 'endt'                 => 'required',
-                'openbid'              => 'required|integer',
+                'starbid'              => 'required|integer',
                 'minbid'               => 'required|integer',
                 // 'gallery_images'       => 'nullable|array|min:1',
                 // 'gallery_images.*'     => 'nullable|mimes:jpeg,png,jpg|max:4096',
