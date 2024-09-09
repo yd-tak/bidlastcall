@@ -383,7 +383,7 @@ class ApiController extends Controller {
             Item::where('id',$request->item_id)->save($updateItem);
             ResponseService::successResponse("Bid Success", $item);
             DB::commit();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
             ResponseService::logErrorResponse($e, "API Controller -> bidItem");
             ResponseService::errorResponse();
