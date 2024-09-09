@@ -371,7 +371,7 @@ class ApiController extends Controller {
             }
             $item->last_price=$request->bid_price;
             fwrite($file,json_encode($item));
-            fclose($filepath);
+            fclose($file);
             $itembid=ItemBid::create([
                 'user_id'=>$user->id,
                 'item_id'=>$request->item_id,
