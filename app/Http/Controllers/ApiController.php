@@ -385,8 +385,8 @@ class ApiController extends Controller {
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            ResponseService::logErrorResponse($e, "API Controller -> bidItem");
-            ResponseService::errorResponse();
+            // ResponseService::logErrorResponse($e, "API Controller -> bidItem");
+            ResponseService::errorResponse($e->getMessage());
         }
     }
     public function addItem(Request $request) {
