@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BidcoinPurchase;
+use App\Models\BidcoinBalance;
 use App\Services\BootstrapTableService;
 use App\Services\FileService;
 use App\Services\NotificationService;
@@ -77,6 +78,17 @@ class BidcoinPurchaseController extends Controller {
             $bidcoinpurchase->update([
                 ...$request->all()
             ]);
+            if($request->status=='approved'){
+                BidcoinBalance::create([
+                    'user_id'=>$bidcoinpurchase->user_id,
+                    'debit'=>$bidcoinpurchase->bidcoin,
+                    'credit'=>0,
+                    'trx'=>'bidcoinpurchase.approval',
+                    'trx_id'=>$bidcoinpurchase->id,
+                    'notes'=>'Purchase '.$bidcoinpurchase->bidcoin.' Bidcoin Approved'
+                ]);
+
+            }
             ResponseService::successResponse('Bidcoin Purchase Status Updated Successfully');
         } catch (Throwable $th) {
             ResponseService::logErrorResponse($th, 'BidcoinPurchaseController ->updateItemApproval');
