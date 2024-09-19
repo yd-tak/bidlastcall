@@ -32,6 +32,7 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
     Route::post('update-item-status', [ApiController::class, 'updateItemStatus']);
     Route::post('bid-item', [ApiController::class, 'bidItem']);
 
+    Route::post('buy-now', [ApiController::class, 'buyNow']);
 
     Route::post('assign-free-package', [ApiController::class, 'assignFreePackage']);
     Route::post('make-item-featured', [ApiController::class, 'makeFeaturedItem']);

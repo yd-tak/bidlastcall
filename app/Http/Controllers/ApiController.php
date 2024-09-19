@@ -339,7 +339,8 @@ class ApiController extends Controller {
         $file=fopen($filepath,"w");
         fwrite($file,json_encode([
             'time_limit'=>$item->enddt,
-            'last_price'=>$item->startbid
+            'last_price'=>$item->startbid,
+            'status'=>'open'
         ]));
         fclose($file);
         ResponseService::successResponse("Bid Opened", $item);
@@ -375,7 +376,8 @@ class ApiController extends Controller {
                 'item_id'=>$request->item_id,
                 'bid_amount'=>$request->bid_amount,
                 'bid_price'=>$request->bid_price,
-                'bid_dt'=>$now
+                'bid_dt'=>$now,
+                'tipe'=>'bid'
             ]);
             $updateItem['winnerbidid']=$itembid->id;
             $itemdb=Item::where('id',$request->item_id)->first();
@@ -387,6 +389,58 @@ class ApiController extends Controller {
             }
             $itemdb->save($updateItem);
 
+            $file=fopen($filepath,"w");
+            fwrite($file,json_encode($item));
+            fclose($file);
+            
+            DB::commit();
+
+            ResponseService::successResponse("Bid Success", $item);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // ResponseService::logErrorResponse($e, "API Controller -> bidItem");
+            ResponseService::errorResponse($e->getMessage());
+        }
+    }
+    public function buyNow(Request $request){
+        try {
+            DB::beginTransaction();
+            $filepath=public_path('items/'.$request->item_id.'.json');
+            $itemfile=file_get_contents($filepath);
+            $item=json_decode($itemfile);
+            $user = Auth::user();
+            $now=date("Y-m-d H:i:s");
+            $bidtimelimitdt=new \DateTime($item->time_limit);
+            $bidtimelimitdt->modify("-1 minute");
+            $extendlimitdt=$bidtimelimitdt->format("Y-m-d H:i:s");
+            if($now>$item->time_limit){
+                throw new \Exception("Tidak dapat Buy Now, waktu BID sudah HABIS");
+            }
+            if($request->buy_price<=$item->last_price){
+                throw new \Exception("Tidak dapat Buy Now, harga bid sudah diatas Buy Now");
+            }
+            
+            $updateItem=[];
+            $item->last_price=$request->buy_price;
+            $itembid=ItemBid::create([
+                'user_id'=>$user->id,
+                'item_id'=>$request->item_id,
+                'bid_amount'=>$request->buy_price,
+                'bid_price'=>$request->buy_price,
+                'bid_dt'=>$now,
+                'tipe'=>'buy'
+            ]);
+            $updateItem['winnerbidid']=$itembid->id;
+            $itemdb=Item::where('id',$request->item_id)->first();
+            if(isset($updateItem['winnerbidid'])){
+                $itemdb->winnerbidid=$updateItem['winnerbidid'];
+            }
+            if(isset($updateItem['enddt'])){
+                $itemdb->enddt=$updateItem['enddt'];
+            }
+            $itemdb->save($updateItem);
+            $item->status='closed';
             $file=fopen($filepath,"w");
             fwrite($file,json_encode($item));
             fclose($file);
@@ -519,7 +573,8 @@ class ApiController extends Controller {
             $file=fopen($filepath,"w");
             fwrite($file,json_encode([
                 'time_limit'=>$item->enddt,
-                'last_price'=>$item->startbid
+                'last_price'=>$item->startbid,
+                'status'=>'open'
             ]));
             fclose($file);
 

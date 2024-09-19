@@ -17,6 +17,7 @@ class ItemBid extends Model {
         'item_id',
         'bid_amount',
         'bid_price',
+        'tipe',
         'created_at',
         'updated_at'
     ];
