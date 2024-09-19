@@ -313,11 +313,9 @@ class ApiController extends Controller {
         $package=BidcoinPackage::where('id',$request->bidcoin_package_id)->first();
         $img=null;
         if ($request->hasFile('uploadProof')) {
-            $galleryImages = [];
-            $img=$request->file('uploadProof');
-            $img=FileService::compressAndUpload($img,'bidcoin_purchase');
+            $img = FileService::compressAndReplace($request->file('uploadProof'), 'bidcoin_purchase', $item->getRawOriginal('uploadProof'));
         }
-
+        
         $purchase=BidcoinPurchase::create([
             'user_id'=>$user->id,
             'bidcoin_package_id'=>$request->bidcoin_package_id,
