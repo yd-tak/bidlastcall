@@ -1840,9 +1840,11 @@ class ApiController extends Controller {
     public function getBidHistory(Request $request) {
         try {
             $user = Auth::user();
-            $sql = Item::select('items.*','ib.bid_price as my_bid_price','winnerib.bid_price as winner_bid_price')->with('user:id,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name')
+            $sql = Item::selectRaw('items.*,max(ib.bid_price) as my_bid_price,winnerib.bid_price as winner_bid_price')->with('user:id,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name')
             ->join('item_bids as ib','ib.item_id','=','items.id')->where('ib.user_id',$user->id)
             ->leftJoin('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
+            ->orderBy('ib.created_at','desc')
+            ->groupBy('items.id')
             ->get();
             $bidHistories=[];
             foreach($sql as $row){
@@ -1855,6 +1857,50 @@ class ApiController extends Controller {
                 $bidHistories[]=$row;
             }
             ResponseService::successResponse("Bid History Fetched", $bidHistories);
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e);
+            ResponseService::errorResponse();
+        }
+    }
+    public function getSellHistory(Request $request) {
+        try {
+            $user = Auth::user();
+            $sql = Item::select('items.*','winnerib.bid_price as winner_bid_price')->with('user:id,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name')
+            ->leftJoin('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
+            ->where('items.user_id',$user->id)
+            ->orderBy('items.created_at','desc')
+            ->get();
+            $all=[];
+            $open=[];
+            $closed=[];
+            $now=new \DateTime();
+
+            foreach($sql as $row){
+                $haswinner=false;
+                $hasclosed=false;
+                $enddt=new \DateTime($row->enddt);
+                if($enddt>$now){
+                    $hasclosed=true;
+                    if($row->winner_bid_price!=null){
+                        $haswinner=true;
+                    }
+                }
+                $row->haswinner=$haswinner;
+                $row->hasclosed=$hasclosed;
+                
+                $all[]=$row;
+                if($hasclosed){
+                    $closed[]=$row;
+                }
+                else{
+                    $open[]=$row;
+                }
+            }
+            ResponseService::successResponse("Sell History Fetched", [
+                'all'=>$all,
+                'open'=>$open,
+                'closed'=>$closed
+            ]);
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);
             ResponseService::errorResponse();
