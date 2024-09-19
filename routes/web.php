@@ -22,6 +22,11 @@ use App\Http\Controllers\StaffController;
 use App\Http\Controllers\SystemUpdateController;
 use App\Http\Controllers\TipController;
 use App\Http\Controllers\WebhookController;
+
+use App\Http\Controllers\BidcoinPackageController;
+use App\Http\Controllers\BidcoinPurchaseController;
+use App\Http\Controllers\BidcoinBalanceController;
+
 use App\Services\CachingService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;

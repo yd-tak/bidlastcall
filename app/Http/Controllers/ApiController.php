@@ -605,8 +605,9 @@ class ApiController extends Controller {
             ResponseService::validationError($validator->errors()->first());
         }
         try {
-            $sql = Item::with('user:id,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name')
+            $sql = Item::with('user:id,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_bid:bid_price,tipe,created_at')
                 ->withCount('favourites')
+                ->with('item_bid')
                 ->when($request->id, function ($sql) use ($request) {
                     $sql->where('id', $request->id);
                 })->when(($request->category_id), function ($sql) use ($request) {
@@ -641,12 +642,6 @@ class ApiController extends Controller {
                 })->when($request->slug, function ($sql) use ($request) {
                     return $sql->where('slug', $request->slug);
                 });
-
-            //            // Other users should only get approved items
-            //            if (!Auth::check()) {
-            //                $sql->where('status', 'approved');
-            //            }
-
 
             // Sort By
             if ($request->sort_by == "new-to-old") {
@@ -739,10 +734,6 @@ class ApiController extends Controller {
                 $sql->where('status', 'approved');
             }
             if (!empty($request->id)) {
-                /*
-                 * Collection does not support first OR find method's result as of now. It's a part of R&D
-                 * So currently using this shortcut method get() to fetch the first data
-                 */
                 $result = $sql->get();
                 if (count($result) == 0) {
                     ResponseService::errorResponse("No item Found");
@@ -752,18 +743,6 @@ class ApiController extends Controller {
             }
 
 
-            //                // Add three regular items
-            //                for ($i = 0; $i < 3 && $regularIndex < $regularItemCount; $i++) {
-            //                    $items->push($regularItems[$regularIndex]);
-            //                    $regularIndex++;
-            //                }
-            //
-            //                // Add one featured item if available
-            //                if ($featuredIndex < $featuredItemCount) {
-            //                    $items->push($featuredItems[$featuredIndex]);
-            //                    $featuredIndex++;
-            //                }
-            //            }
             // Return success response with the fetched items
             ResponseService::successResponse("Item Fetched Successfully", new ItemCollection($result),['query'=>DB::getQueryLog()]);
         } catch (Throwable $th) {
