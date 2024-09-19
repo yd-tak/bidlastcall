@@ -16,64 +16,37 @@ use function compact;
 use function view;
 
 class BidcoinPackageController extends Controller {
-    private string $uploadFolder;
-
     public function __construct() {
-
     }
-
     public function index() {
         // ResponseService::noAnyPermissionThenRedirect(['category-list', 'category-create', 'category-update', 'category-delete']);
-        return view('bidcoinpakage.index');
+        return view('bidcoinpackage.index');
     }
 
     public function create(Request $request) {
-        $languages = CachingService::getLanguages()->where('code', '!=', 'en')->values();
         // ResponseService::noPermissionThenRedirect('category-create');
-        $categories = BidcoinPackage::with('subcategories');
-        if (isset($request->id)) {
-            $categories = $categories->where('parent_category_id', $request->id)->orWhere('id', $request->id);
-        } else {
-            $categories = $categories->whereNull('parent_category_id');
-        }
-        $categories = $categories->get();
-        return view('category.create', compact('categories', 'languages'));
+        return view('bidcoinpackage.create');
     }
 
     public function store(Request $request) {
         // ResponseService::noPermissionThenSendJson('category-create');
         $request->validate([
             'name'               => 'required',
-            'image'              => 'required|mimes:jpg,jpeg,png|max:4096',
-            'parent_category_id' => 'nullable|integer',
-            'description'        => 'nullable',
-            'slug'               => 'required',
-            'status'             => 'required|boolean',
-            'translations.*'     => 'required|string',
+            'price' => 'required|integer',
+            // 'bidcoin' => 'required|integer',
+            'normalbidcoin' => 'required|integer',
+            'bonusbidcoin' => 'required|integer',
+            'description'        => 'required',
+            'status'             => 'required|boolean'
         ]);
 
         try {
             $data = $request->all();
-            $data['slug'] = HelperService::generateUniqueSlug(new Category(), $request->slug);
+            // var_dump($data);
+            $data['bidcoin']=$data['normalbidcoin']+$data['bonusbidcoin'];
+            $bidcoin = BidcoinPackage::create($data);
 
-            if ($request->hasFile('image')) {
-                $data['image'] = FileService::compressAndUpload($request->file('image'), $this->uploadFolder);
-            }
-
-            $category = Category::create($data);
-
-            if (!empty($request->translations)) {
-                foreach ($request->translations as $key => $value) {
-                    if (!empty($value)) {
-                        $category->translations()->create([
-                            'name'        => $value,
-                            'language_id' => $key,
-                        ]);
-                    }
-                }
-            }
-
-            ResponseService::successRedirectResponse("Category Added Successfully");
+            ResponseService::successRedirectResponse("Bidcoin Package Added Successfully");
         } catch (Throwable $th) {
             ResponseService::logErrorRedirect($th);
             ResponseService::errorRedirectResponse();
@@ -87,12 +60,7 @@ class BidcoinPackageController extends Controller {
         $limit = $request->input('limit', 10);
         $sort = $request->input('sort', 'sequence');
         $order = $request->input('order', 'ASC');
-        $sql = Category::withCount('subcategories')->orderBy($sort, $order)->withCount('custom_fields');
-        if ($id == "0") {
-            $sql->whereNull('parent_category_id');
-        } else {
-            $sql->where('parent_category_id', $id);
-        }
+        $sql=BidcoinPackage::select('*');
         if (!empty($request->search)) {
             $sql = $sql->search($request->search);
         }
@@ -105,13 +73,8 @@ class BidcoinPackageController extends Controller {
         $no = 1;
         foreach ($result as $key => $row) {
             $operate = '';
-            if (Auth::user()->can('category-update')) {
-                $operate .= BootstrapTableService::editButton(route('category.edit', $row->id));
-            }
-
-            if (Auth::user()->can('category-edit')) {
-                $operate .= BootstrapTableService::deleteButton(route('category.destroy', $row->id));
-            }
+            $operate .= BootstrapTableService::editButton(route('bidcoinpackage.edit', $row->id));
+            $operate .= BootstrapTableService::deleteButton(route('bidcoinpackage.destroy', $row->id));
             $tempRow = $row->toArray();
             $tempRow['no'] = $no++;
             $tempRow['operate'] = $operate;
@@ -123,56 +86,32 @@ class BidcoinPackageController extends Controller {
 
     public function edit($id) {
         // ResponseService::noPermissionThenRedirect('category-update');
-        $category_data = Category::findOrFail($id);
-        // Fetch translations for the category
-        $translations = $category_data->translations->pluck('name', 'language_id')->toArray();
-
-        $parent_category_data = Category::find($category_data->parent_category_id);
-        $parent_category = $parent_category_data->name ?? '';
-
-        // Fetch all languages
-        $languages = CachingService::getLanguages()->where('code', '!=', 'en')->values();
-
-        return view('category.edit', compact('category_data', 'parent_category', 'translations', 'languages'));
+        $bidcoinpackage_data = BidcoinPackage::findOrFail($id);
+        
+        return view('bidcoinpackage.edit', compact('bidcoinpackage_data'));
     }
 
     public function update(Request $request, $id) {
         // ResponseService::noPermissionThenSendJson('category-update');
         try {
             $request->validate([
-                'name'            => 'nullable',
-                'image'           => 'nullable|mimes:jpg,jpeg,png|max:4096',
-                'parent_category' => 'nullable|integer',
-                'description'     => 'nullable',
-                'slug'            => 'nullable',
-                'status'          => 'required|boolean'
+                'name'               => 'required',
+                'price' => 'required|integer',
+                // 'bidcoin' => 'required|integer',
+                'normalbidcoin' => 'required|integer',
+                'bonusbidcoin' => 'required|integer',
+                'description'        => 'required',
+                'status'             => 'required|boolean'
             ]);
 
-            $category = Category::find($id);
+            $bidcoinpackage = BidcoinPackage::find($id);
 
             $data = $request->all();
-            if ($request->hasFile('image')) {
-                $data['image'] = FileService::compressAndReplace($request->file('image'), $this->uploadFolder, $category->getRawOriginal('image'));
-            }
-            $data['slug'] = HelperService::generateUniqueSlug(new Category(), $request->slug, $category->id);
-            $category->update($data);
+            $data['bidcoin']=$data['normalbidcoin']+$data['bonusbidcoin'];
+            $bidcoinpackage->update($data);
 
-            if (!empty($request->translations)) {
-                $categoryTranslations = [];
-                foreach ($request->translations as $key => $value) {
-                    $categoryTranslations[] = [
-                        'category_id' => $category->id,
-                        'language_id' => $key,
-                        'name'        => $value,
-                    ];
-                }
-
-                if (count($categoryTranslations) > 0) {
-                    CategoryTranslation::upsert($categoryTranslations, ['category_id', 'language_id'], ['name']);
-                }
-            }
-
-            ResponseService::successRedirectResponse("Category Updated Successfully", route('category.index'));
+            
+            ResponseService::successRedirectResponse("Bidcoin Package Updated Successfully", route('bidcoinpackage.index'));
         } catch (Throwable $th) {
             ResponseService::logErrorRedirect($th);
             ResponseService::errorRedirectResponse('Something Went Wrong');
@@ -182,80 +121,16 @@ class BidcoinPackageController extends Controller {
     public function destroy($id) {
         // ResponseService::noPermissionThenSendJson('category-delete');
         try {
-            $category = Category::find($id);
-            if ($category->delete()) {
-                ResponseService::successResponse('Category delete successfully');
+            $bidcoinpackage = BidcoinPackage::find($id);
+            if ($bidcoinpackage->delete()) {
+                ResponseService::successResponse('Bidcoin Package deleted successfully');
             }
         } catch (QueryException $th) {
-            ResponseService::logErrorResponse($th, 'Failed to delete category', 'Cannot delete category. Remove associated subcategories and custom fields first.');
+            ResponseService::logErrorResponse($th, 'Failed to delete bidcoin package', 'Cannot delete bidcoin package. Remove associated data first.');
             ResponseService::errorResponse('Something Went Wrong');
         } catch (Throwable $th) {
-            ResponseService::logErrorResponse($th, "CategoryController -> delete");
+            ResponseService::logErrorResponse($th, "BidcoinPackageController -> delete");
             ResponseService::errorResponse('Something Went Wrong');
         }
-    }
-
-    public function getSubCategories($id) {
-        ResponseService::noPermissionThenRedirect('category-list');
-        $category = Category::findOrFail($id);
-        return view('category.index', compact('category'));
-    }
-
-    public function customFields($id) {
-        ResponseService::noPermissionThenRedirect('custom-field-list');
-        $category = Category::find($id);
-        $p_id = $category->parent_category_id;
-        $cat_id = $category->id;
-        $category_name = $category->name;
-
-        return view('category.custom-fields', compact('cat_id', 'category_name', 'p_id'));
-    }
-
-    public function getCategoryCustomFields(Request $request, $id) {
-        ResponseService::noPermissionThenSendJson('custom-field-list');
-        $offset = $request->input('offset', 0);
-        $limit = $request->input('limit', 10);
-        $sort = $request->input('sort', 'id');
-        $order = $request->input('order', 'ASC');
-
-        $sql = CustomField::whereHas('categories', static function ($q) use ($id) {
-            $q->where('category_id', $id);
-        })->orderBy($sort, $order);
-
-        if (isset($request->search)) {
-            $sql->search($request->search);
-        }
-
-        $sql->take($limit);
-        $total = $sql->count();
-        $res = $sql->skip($offset)->take($limit)->get();
-        $bulkData = array();
-        $rows = array();
-        $tempRow['type'] = '';
-
-
-        foreach ($res as $row) {
-            $tempRow = $row->toArray();
-//            $operate = BootstrapTableService::editButton(route('custom-fields.edit', $row->id));
-            $operate = BootstrapTableService::deleteButton(route('category.custom-fields.destroy', [$id, $row->id]));
-            $tempRow['operate'] = $operate;
-            $rows[] = $tempRow;
-        }
-
-        $bulkData['rows'] = $rows;
-        $bulkData['total'] = $total;
-        return response()->json($bulkData);
-    }
-
-    public function destroyCategoryCustomField($categoryID, $customFieldID) {
-        try {
-            ResponseService::noPermissionThenRedirect('custom-field-delete');
-            CustomFieldCategory::where(['category_id' => $categoryID, 'custom_field_id' => $customFieldID])->delete();
-            ResponseService::successResponse("Custom Field Deleted Successfully");
-        } catch (Throwable $th) {
-            ResponseService::logErrorResponse($th, "CategoryController -> destroyCategoryCustomField");
-            ResponseService::errorResponse('Something Went Wrong');
-        }
-
     }
 }

@@ -315,7 +315,7 @@ class ApiController extends Controller {
         if ($request->hasFile('uploadProof')) {
             $galleryImages = [];
             $img=$request->file('uploadProof');
-            $img=FileService::compressAndUpload($img,$this->uploadFolder);
+            $img=FileService::compressAndUpload($img,'bidcoin_purchase');
         }
 
         $purchase=BidcoinPurchase::create([

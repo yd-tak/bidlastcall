@@ -53,7 +53,19 @@
                     @endcanany
                 @endcanany
 
-                
+                <li class="sidebar-item">
+                    <a href="{{ route('bidcoinpackage.index') }}" class='sidebar-link'>
+                        <i class="bi bi-coin"></i>
+                        <span class="menu-item">Paket BidCoin</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('bidcoinpurchase.index') }}" class='sidebar-link'>
+                        <i class="bi bi-receipt"></i>
+                        <span class="menu-item">Pembelian BidCoin</span>
+                    </a>
+                </li>
+
                 @canany(['role-list','role-create','role-update','role-delete','staff-list','staff-create','staff-update','staff-delete'])
                     <div class="sidebar-new-title">{{ __('Staff Management') }}</div>
                     @canany(['role-list','role-create','role-update','role-delete'])

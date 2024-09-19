@@ -85,6 +85,13 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
     });
 
 
+    Route::resource('bidcoinpackage', BidcoinPackageController::class);
+    Route::resource('bidcoinpurchase', BidcoinPurchaseController::class);
+    Route::group(['prefix' => 'bidcoinpurchase'], static function () {
+        Route::put('/{id}/approval', [BidcoinPurchaseController::class, 'updateBidcoinPurchaseApproval'])->name('bidcoinpurchase.approval');
+    });
+    
+    
     /*** Home Module : START ***/
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::get('change-password', [HomeController::class, 'changePasswordIndex'])->name('change-password.index');

@@ -19,6 +19,11 @@ class BidcoinPurchase extends Model {
         'img',
         'status'
     ];
-
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
+    public function bidcoinpackage(){
+        return $this->belongsTo(BidcoinPackage::class,'bidcoin_package_id');
+    }
     
 }
