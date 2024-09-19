@@ -605,7 +605,7 @@ class ApiController extends Controller {
             ResponseService::validationError($validator->errors()->first());
         }
         try {
-            $sql = Item::with('user:id,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_bid:bid_price,tipe,created_at')
+            $sql = Item::with('user:id,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name')
                 ->withCount('favourites')
                 ->with('item_bid')
                 ->when($request->id, function ($sql) use ($request) {
@@ -1360,7 +1360,7 @@ class ApiController extends Controller {
                     try {
                         $paymentIntent = PaymentService::create($data->payment_gateway)->retrievePaymentIntent($data->order_id);
                     } catch (Throwable) {
-//                        PaymentTransaction::find($data->id)->update(['payment_status' => "failed"]);
+                        PaymentTransaction::find($data->id)->update(['payment_status' => "failed"]);
                     }
 
                     if (!empty($paymentIntent) && $paymentIntent['status'] != "pending") {
@@ -1834,6 +1834,29 @@ class ApiController extends Controller {
 
         } catch (Throwable $th) {
             ResponseService::logErrorResponse($th, 'API Controller -> storeContactUs');
+            ResponseService::errorResponse();
+        }
+    }
+    public function getBidHistory(Request $request) {
+        try {
+            $user = Auth::user();
+            $sql = Item::select('items.*','ib.bid_price as my_bid_price','winnerib.bid_price as winner_bid_price')->with('user:id,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name')
+            ->join('item_bids as ib','ib.item_id','=','items.id')->where('ib.user_id',$user->id)
+            ->leftJoin('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
+            ->get();
+            $bidHistories=[];
+            foreach($sql as $row){
+                if($row->my_bid_price==$row->winner_bid_price){
+                    $row->iswinner=true;
+                }
+                else{
+                    $row->iswinner=false;
+                }
+                $bidHistories[]=$row;
+            }
+            ResponseService::successResponse("Bid History Fetched", $bidHistories);
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e);
             ResponseService::errorResponse();
         }
     }

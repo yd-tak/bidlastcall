@@ -46,6 +46,8 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
     Route::post('payment-intent', [ApiController::class, 'getPaymentIntent']);
     Route::get('payment-transactions', [ApiController::class, 'getPaymentTransactions']);//ini
 
+    Route::get('bid-history', [ApiController::class, 'getBidHistory']);//ini histori bid
+
     /*Chat Module*/
     // Route::post('item-offer', [ApiController::class, 'createItemOffer']);
     // Route::get('chat-list', [ApiController::class, 'getChatList']);
