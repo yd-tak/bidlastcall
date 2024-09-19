@@ -35,13 +35,11 @@
                             <thead class="thead-dark">
                             <tr>
                                 <th scope="col" data-field="id" data-sortable="true">{{ __('ID') }}</th>
-                                <th scope="col" data-field="profile" data-formatter="imageFormatter">{{ __('Profile') }}</th>
                                 <th scope="col" data-field="name" data-sortable="true">{{ __('Name') }}</th>
                                 <th scope="col" data-field="email" data-sortable="true">{{ __('Email') }}</th>
                                 <th scope="col" data-field="mobile" data-sortable="true">{{ __('Mobile') }}</th>
-                                <th scope="col" data-field="type" data-sortable="true">{{ __('Type') }}</th>
-                                <th scope="col" data-field="address" data-sortable="true">{{ __('Address') }}</th>
                                 <th scope="col" data-field="items_count" data-sortable="true">{{ __('Total Post') }}</th>
+                                <th scope="col" data-field="bidcoin_balances_sum_amount" data-sortable="true">Bidcoin</th>
                                 <th scope="col" data-field="status" data-formatter="statusSwitchFormatter" data-sortable="false">{{ __('Status') }}</th>
                                 <th scope="col" data-field="operate" data-escape="false" data-align="center" data-sortable="false" data-events="userEvents">{{ __('Action') }}</th>
                             </tr>

@@ -54,7 +54,9 @@ class CustomersController extends Controller {
             $sql = User::role('User')->orderBy($sort, $order)->withCount('items')->withTrashed();
         }
 
-
+        $sql->withSum(['bidcoin_balances'=>function($query){
+            $query->select(DB::raw('ifnull(SUM(debit)-SUM(credit),0) as amount'));
+        }],'amount');
         if (!empty($request->search)) {
             $sql = $sql->search($request->search);
         }

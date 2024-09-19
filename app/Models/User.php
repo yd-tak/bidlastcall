@@ -88,4 +88,7 @@ class User extends Authenticatable {
     public function fcm_tokens() {
         return $this->hasMany(UserFcmToken::class);
     }
+    public function bidcoin_balances(){
+        return $this->hasMany(BidcoinBalance::class);
+    }
 }
