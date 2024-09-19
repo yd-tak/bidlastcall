@@ -102,10 +102,13 @@ class CategoryController extends Controller {
         $total = $sql->count();
         $sql->skip($offset)->take($limit);
         $result = $sql->get();
+        // echo json_encode($result);exit;
         $bulkData = array();
         $bulkData['total'] = $total;
         $rows = array();
         $no = 1;
+        // return response()->json($bulkData);
+        // return "A";
         foreach ($result as $key => $row) {
             $operate = '';
             if (Auth::user()->can('category-update')) {
@@ -121,6 +124,7 @@ class CategoryController extends Controller {
             $rows[] = $tempRow;
         }
         $bulkData['rows'] = $rows;
+        // echo json_encode($bulkData);exit;
         return response()->json($bulkData);
     }
 

@@ -25,5 +25,12 @@ class BidcoinPurchase extends Model {
     public function bidcoinpackage(){
         return $this->belongsTo(BidcoinPackage::class,'bidcoin_package_id');
     }
+    public function getImgAttribute($img) {
+        if (!empty($img)) {
+            return url(Storage::url($img));
+        }
+        return $img;
+    }
+
     
 }
