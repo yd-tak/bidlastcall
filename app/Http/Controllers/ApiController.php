@@ -24,6 +24,7 @@ use App\Models\Item;
 use App\Models\ItemBid;
 use App\Models\ItemCustomFieldValue;
 use App\Models\ItemImages;
+use App\Models\ItemPayment;
 use App\Models\ItemOffer;
 use App\Models\Language;
 use App\Models\Notifications;
@@ -399,12 +400,15 @@ class ApiController extends Controller {
             DB::beginTransaction();
             $user=Auth::user();
             $userdb=User::find($user->id)->first();
-            $item=Item::with('user:id,seller_uname','item_bid:id,user_id,bid_amount,bid_price,tipe,created_at','item_payment','category:id,name,image', 'gallery_images:id,image,item_id')->where('id',$request->item_id)->first();
+            $item=Item::with('user:id,seller_uname','item_bid:id,user_id,bid_amount,bid_price,tipe,created_at','item_payment','category:id,name,image', 'gallery_images:id,image,item_id','item_payment')->where('id',$request->item_id)->first();
             if($item==null){
                 throw new \Exception("Item not found");
             }
             if($item->item_bid==null){
                 throw new \Exception("This item have no bid winner");
+            }
+            if($item->item_payment!=null){
+                throw new \Exception("This item have pending payment for review / have been paid");
             }
             $winner=User::find($item->item_bid->user_id)->first();
             $winner_bid=$item->item_bid;
