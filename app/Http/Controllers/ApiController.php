@@ -30,6 +30,7 @@ use App\Models\Notifications;
 use App\Models\Package;
 use App\Models\PaymentConfiguration;
 use App\Models\PaymentTransaction;
+use App\Models\Pg;
 use App\Models\ReportReason;
 use App\Models\Setting;
 use App\Models\Slider;
@@ -57,12 +58,13 @@ use Throwable;
 class ApiController extends Controller {
 
     private string $uploadFolder;
-
+    private $now;
     public function __construct() {
         $this->uploadFolder = 'item_images';
         if (array_key_exists('HTTP_AUTHORIZATION', $_SERVER)) {
             $this->middleware('auth:sanctum');
         }
+        $this->now=date("Y-m-d H:i:s");
     }
 
     public function getSystemSettings(Request $request) {
@@ -169,6 +171,8 @@ class ApiController extends Controller {
         try {
             $validator = Validator::make($request->all(), [
                 'name'    => 'nullable|string',
+                'seller_uname'=>'required|string',
+                'buyer_uname'=>'required|string',
                 'profile' => 'nullable|mimes:jpg,jpeg,png|max:4096',
                 'email'   => 'nullable|email|unique:users,email,' . Auth::user()->id,
                 'mobile'  => 'sometimes|unique:users,mobile,' . Auth::user()->id,
@@ -338,10 +342,103 @@ class ApiController extends Controller {
         fwrite($file,json_encode([
             'time_limit'=>$item->enddt,
             'last_price'=>$item->startbid,
+            'bidder_uname'=>null,
             'status'=>'open'
         ]));
         fclose($file);
         ResponseService::successResponse("Bid Opened", $item);
+    }
+    public function getItemDetail(Request $request){
+        try{
+            $item=Item::with('user:id,seller_uname','item_bid:id,user_id,bid_amount,bid_price,tipe,created_at','item_payment','category:id,name,image', 'gallery_images:id,image,item_id')->where('id',$request->item_id)->first();
+            if($item==null){
+                throw new \Exception("Item not found");
+            }
+            // $item->bidstatus='open';
+            $currbidstatus=$item->bidstatus;
+            if($item->item_bid!=null){
+                $winner=User::find($item->item_bid->user_id)->first();
+                $item->item_bid->winner_uname=$winner->buyer_uname;
+                if($item->item_bid->tipe=='buy'){
+                    $item->bidstatus='closed';
+                }
+
+            }
+            if($item->bidstatus=='open' && $item->enddt<$this->now){
+                $item->bidstatus='closed';
+            }
+            if($currbidstatus=='open' && $item->bidstatus=='closed'){
+                Item::find($item->id)->first()->save(['bidstatus'=>'closed']);
+            }
+
+            $itembids=ItemBid::with('user:id,buyer_uname')->where('item_id',$request->item_id)->get();
+            $item->bids=$itembids;
+            ResponseService::successResponse("Item Detail", $item);
+        } catch (\Exception $e) {
+            // ResponseService::logErrorResponse($e, "API Controller -> bidItem");
+            ResponseService::errorResponse($e->getMessage());
+        }
+    }
+    public function getPgs(Request $request){
+        $pgs=Pg::get();
+        ResponseService::successResponse("PG List", $pgs);
+    }
+    public function payItem(Request $request){
+        try {
+            $validator = Validator::make($request->all(), [
+                'item_id' => 'required',
+                'pg_id' => 'required',
+                'paymentdate' => 'required',
+                'amount' => 'required|integer',
+                'accnum' => 'required',
+            ]);
+            if ($validator->fails()) {
+                ResponseService::validationError($validator->errors()->first());
+            }
+
+            DB::beginTransaction();
+            $user=Auth::user();
+            $userdb=User::find($user->id)->first();
+            $item=Item::with('user:id,seller_uname','item_bid:id,user_id,bid_amount,bid_price,tipe,created_at','item_payment','category:id,name,image', 'gallery_images:id,image,item_id')->where('id',$request->item_id)->first();
+            if($item==null){
+                throw new \Exception("Item not found");
+            }
+            if($item->item_bid==null){
+                throw new \Exception("This item have no bid winner");
+            }
+            $winner=User::find($item->item_bid->user_id)->first();
+            $winner_bid=$item->item_bid;
+            $item->item_bid->winner_uname=$winner->buyer_uname;
+            if($item->item_bid->tipe=='buy'){
+                $item->bidstatus='closed';
+            }
+            if($item->bidstatus=='open' && $item->enddt<$this->now){
+                $item->bidstatus='closed';
+            }
+            if($item->bidstatus=='open'){
+                throw new \Exception("Bidding is still open");
+            }
+            if($winner->id!==$userdb->id){
+                throw new \Exception("You are not the bid winner for this item");
+            }
+            if($request->amount!=$winner_bid->bid_price){
+                throw new \Exception("You must pay what you bid for: Rp ".number_format($winner_bid->bid_price));
+            }
+            $data = [
+                ...$request->all(),
+                'item_bid_id'=>$winner_bid->id,
+                'status'=>'review'
+            ];
+            $item_payment=ItemPayment::create($data);
+
+            DB::commit();
+
+            ResponseService::successResponse("Payment Success", $item_payment);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            ResponseService::errorResponse($e->getMessage());
+        }
     }
     public function bidItem(Request $request){
         try {
@@ -350,6 +447,7 @@ class ApiController extends Controller {
             $itemfile=file_get_contents($filepath);
             $item=json_decode($itemfile);
             $user = Auth::user();
+            $userdb = User::find($user->id)->first();
             $now=date("Y-m-d H:i:s");
             $bidtimelimitdt=new \DateTime($item->time_limit);
             $bidtimelimitdt->modify("-1 minute");
@@ -369,6 +467,7 @@ class ApiController extends Controller {
                 $updateItem['enddt']=$item->time_limit;
             }
             $item->last_price=$request->bid_price;
+            $item->bidder_uname=$userdb->buyer_uname;
             $itembid=ItemBid::create([
                 'user_id'=>$user->id,
                 'item_id'=>$request->item_id,
@@ -408,6 +507,7 @@ class ApiController extends Controller {
             $itemfile=file_get_contents($filepath);
             $item=json_decode($itemfile);
             $user = Auth::user();
+            $userdb = User::find($user->id)->first();
             $now=date("Y-m-d H:i:s");
             $bidtimelimitdt=new \DateTime($item->time_limit);
             $bidtimelimitdt->modify("-1 minute");
@@ -439,6 +539,7 @@ class ApiController extends Controller {
             }
             $itemdb->save($updateItem);
             $item->status='closed';
+            $item->bidder_uname=$userdb->buyer_uname;
             $file=fopen($filepath,"w");
             fwrite($file,json_encode($item));
             fclose($file);
@@ -603,7 +704,7 @@ class ApiController extends Controller {
             ResponseService::validationError($validator->errors()->first());
         }
         try {
-            $sql = Item::with('user:id,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name')
+            $sql = Item::with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name')
                 ->withCount('favourites')
                 ->with('item_bid')
                 ->when($request->id, function ($sql) use ($request) {
@@ -842,7 +943,7 @@ class ApiController extends Controller {
                 }
             }
 
-            $result = Item::with('user:id,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area')->where('id', $item->id)->get();
+            $result = Item::with('user:id,seller_uname,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area')->where('id', $item->id)->get();
             /*
              * Collection does not support first OR find method's result as of now. It's a part of R&D
              * So currently using this shortcut method
@@ -1132,7 +1233,7 @@ class ApiController extends Controller {
             }
             $favouriteItemIDS = Favourite::where('user_id', Auth::user()->id)->select('item_id')->pluck('item_id');
             $items = Item::whereIn('id', $favouriteItemIDS)
-                ->with('user:id,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->where('status', '<>', 'sold out')->paginate();
+                ->with('user:id,seller_uname,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->where('status', '<>', 'sold out')->paginate();
 
             ResponseService::successResponse("Data Fetched Successfully", new ItemCollection($items));
         } catch (Throwable $th) {
@@ -1227,7 +1328,7 @@ class ApiController extends Controller {
             $rows = array();
 
             foreach ($featureSection as $row) {
-                $items = Item::where('status', 'approved')->take(5)->with('user:id,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->withCount('favourites')->has('user');
+                $items = Item::where('status', 'approved')->take(5)->with('user:id,seller_uname,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->withCount('favourites')->has('user');
                 $items = match ($row->filter) {
                     "price_criteria" => $items->whereBetween('price', [$row->min_price, $row->max_price]),
                     "most_viewed" => $items->orderBy('clicks', 'DESC'),
@@ -1838,7 +1939,7 @@ class ApiController extends Controller {
     public function getBidHistory(Request $request) {
         try {
             $user = Auth::user();
-            $sql = Item::selectRaw('items.*,max(ib.bid_price) as my_bid_price,winnerib.bid_price as winner_bid_price')->with('user:id,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name')
+            $sql = Item::selectRaw('items.*,max(ib.bid_price) as my_bid_price,winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name')
             ->join('item_bids as ib','ib.item_id','=','items.id')->where('ib.user_id',$user->id)
             ->leftJoin('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
             ->orderBy('ib.created_at','desc')
@@ -1863,7 +1964,7 @@ class ApiController extends Controller {
     public function getSellHistory(Request $request) {
         try {
             $user = Auth::user();
-            $sql = Item::select('items.*','winnerib.bid_price as winner_bid_price')->with('user:id,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name')
+            $sql = Item::select('items.*','winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name')
             ->leftJoin('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
             ->where('items.user_id',$user->id)
             ->orderBy('items.created_at','desc')

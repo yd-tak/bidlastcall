@@ -46,7 +46,10 @@ class Item extends Model {
         return $this->belongsTo(User::class);
     }
     public function item_bid(){
-        return $this->hasOne(ItemBid::class);
+        return $this->hasOne(ItemBid::class,'id','winnerbidid');
+    }
+    public function item_payment(){
+        return $this->hasOne(ItemPayment::class);
     }
 
     public function category() {

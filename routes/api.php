@@ -49,6 +49,8 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
     Route::get('bid-history', [ApiController::class, 'getBidHistory']);//ini histori bid
     Route::get('sell-history', [ApiController::class, 'getSellHistory']);//ini histori bid
 
+
+
     /*Chat Module*/
     // Route::post('item-offer', [ApiController::class, 'createItemOffer']);
     // Route::get('chat-list', [ApiController::class, 'getChatList']);
@@ -60,9 +62,13 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
     Route::post('block-user', [ApiController::class, 'blockUser']);
     Route::post('unblock-user', [ApiController::class, 'unblockUser']);
     Route::get('blocked-users', [ApiController::class, 'getBlockedUsers']);
+
+    Route::get('get-item-detail', [ApiController::class, 'getItemDetail']);//item detail dengan bid winner dan payment
+    Route::post('pay-item',[ApiController::class,'payItem']);
+
 });
 
-
+Route::get('get-pgs', [ApiController::class, 'getPgs']);//ini histori bid
 /* Non Authenticated Routes */
 // Route::get('get-package', [ApiController::class, 'getPackage']);
 Route::post('write-bid', [ApiController::class, 'writeBid']);
