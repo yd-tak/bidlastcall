@@ -137,6 +137,7 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
         Route::get('about-us', [SettingController::class, 'page'])->name('settings.about-us.index');
         Route::get('privacy-policy', [SettingController::class, 'page'])->name('settings.privacy-policy.index');
         Route::get('terms-conditions', [SettingController::class, 'page'])->name('settings.terms-conditions.index');
+        Route::get('terms-conditions-seller', [SettingController::class, 'page'])->name('settings.terms-conditions-seller.index');
 
         Route::get('firebase', [SettingController::class, 'page'])->name('settings.firebase.index');
         Route::post('firebase/update', [SettingController::class, 'updateFirebaseSettings'])->name('settings.firebase.update');

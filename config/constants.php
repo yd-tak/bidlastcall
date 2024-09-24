@@ -28,6 +28,7 @@ return [
         ['name' => 'maintenance_mode', 'value' => 0, 'type' => 'string'],
         ['name' => 'privacy_policy', 'value' => '', 'type' => 'string'],
         ['name' => 'terms_conditions', 'value' => '', 'type' => 'string'],
+        ['name' => 'terms_conditions_seller', 'value' => '', 'type' => 'string'],
         ['name' => 'about_us', 'value' => '', 'type' => 'string'],
         ['name' => 'company_tel1', 'value' => '', 'type' => 'string'],
         ['name' => 'company_tel2', 'value' => '', 'type' => 'string'],
