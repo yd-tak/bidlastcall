@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\ItemBid;
 use App\Models\ItemPayment;
 use App\Models\ServiceFee;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -92,6 +93,20 @@ class Item extends Model {
             }
             // var_dump($updateData);
             Self::where('id',$id)->update($updateData);
+            $winneruser=User::where('id',$winnerbid->user_id)->first();
+            $failedPayments=Self::join('item_bids as ib','items.winnerbidid','=','ib.id')->where('items.status','=','not paid')->where('ib.user_id','=',$winnerbid->user_id)->count();
+            $updateUser=[
+                'paymentfailure'=>$failedPayments
+            ];
+            $netFailure=$failedPayments-$winneruser->paymentfailuretolerance;
+            if($netFailure>1){
+                $updateUser['isblocked']=1;
+            }
+            else{
+                $updateUser['isblocked']=0;
+            }
+            User::where('id',$winnerbid->user_id)->update($updateUser);
+            
         }
 
     }

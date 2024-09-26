@@ -67,6 +67,12 @@ class ApiController extends Controller {
             $this->middleware('auth:sanctum');
         }
         $this->now=date("Y-m-d H:i:s");
+        if(Auth::check()){
+            $user=Auth::user();
+            if($user->isblocked){
+                ResponseService::blockedResponse();
+            }
+        }
     }
 
     public function getSystemSettings(Request $request) {
@@ -2015,7 +2021,7 @@ class ApiController extends Controller {
     public function getBidHistory(Request $request) {
         try {
             $user = Auth::user();
-            $sql = Item::selectRaw('items.*,max(ib.bid_price) as my_bid_price,winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name')
+            $sql = Item::selectRaw('items.*,max(ib.bid_price) as my_bid_price,winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_payment')
             ->join('item_bids as ib','ib.item_id','=','items.id')->where('ib.user_id',$user->id)
             ->leftJoin('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
             ->orderBy('ib.created_at','desc')
@@ -2092,7 +2098,7 @@ class ApiController extends Controller {
     public function getSellHistory(Request $request) {
         try {
             $user = Auth::user();
-            $sql = Item::select('items.*','winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name')
+            $sql = Item::select('items.*','winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_payment')
             ->leftJoin('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
             ->where('items.user_id',$user->id)
             ->orderBy('items.created_at','desc')

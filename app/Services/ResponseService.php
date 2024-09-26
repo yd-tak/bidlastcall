@@ -139,10 +139,23 @@ class ResponseService
     {
         response()->json(array_merge([
             'error'   => false,
+            'blocked' => false,
             'message' => trans($message),
             'data'    => $data,
             'code'    => $code ?? config('constants.RESPONSE_CODE.SUCCESS')
         ], $customData))->send();
+        exit();
+    }
+    public static function blockedresponse(string $message = 'Your account are blocked, please contact admin.', $data = null, string|int $code = null, $e = null)
+    {
+        response()->json([
+            'error'   => false,
+            'blocked' => true,
+            'message' => trans($message),
+            'data'    => $data,
+            'code'    => $code ?? config('constants.RESPONSE_CODE.EXCEPTION_ERROR'),
+            'details' => (!empty($e) && is_object($e)) ? $e->getMessage() . ' --> ' . $e->getFile() . ' At Line : ' . $e->getLine() : ''
+        ])->send();
         exit();
     }
 
@@ -172,6 +185,7 @@ class ResponseService
     {
         response()->json([
             'error'   => true,
+            'blocked' => false,
             'message' => trans($message),
             'data'    => $data,
             'code'    => $code ?? config('constants.RESPONSE_CODE.EXCEPTION_ERROR'),
@@ -206,6 +220,7 @@ class ResponseService
     {
         response()->json([
             'error'   => false,
+            'blocked' => false,
             'warning' => true,
             'code'    => $code,
             'message' => trans($message),

@@ -34,7 +34,10 @@ class User extends Authenticatable {
         'country_code',
         'cityid',
         'provinceid',
-        'subdistrictid'
+        'subdistrictid',
+        'paymentfailure',
+        'paymentfailuretolerance',
+        'isblocked'
     ];
 
     /**
