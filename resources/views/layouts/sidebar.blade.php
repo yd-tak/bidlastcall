@@ -69,7 +69,13 @@
                 <li class="sidebar-item">
                     <a href="{{ route('item.indexsales') }}" class='sidebar-link'>
                         <i class="bi bi-receipt"></i>
-                        <span class="menu-item">Pembelian BidCoin</span>
+                        <span class="menu-item">Penjualan Item</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="{{ route('report.pnl') }}" class='sidebar-link'>
+                        <i class="bi bi-receipt"></i>
+                        <span class="menu-item">Laporan P&L</span>
                     </a>
                 </li>
                 @canany(['role-list','role-create','role-update','role-delete','staff-list','staff-create','staff-update','staff-delete'])

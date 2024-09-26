@@ -2036,9 +2036,16 @@ class ApiController extends Controller {
                 }
                 $bidHistories[]=$row;
             }
-            Item::whereIn('id',$open_itemids)->update([
-                'bidstatus'=>'open'
-            ]);
+            if(!empty($open_itemids)){
+                Item::whereIn('id',$open_itemids)->update([
+                    'bidstatus'=>'open'
+                ]);
+            }
+            if(!empty($close_itemids)){
+                Item::whereIn('id',$close_itemids)->update([
+                    'bidstatus'=>'closed'
+                ]);
+            }
             ResponseService::successResponse("Bid History Fetched", $bidHistories);
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);
@@ -2053,8 +2060,22 @@ class ApiController extends Controller {
             ->leftJoin('item_payments as ipay','items.id','=','ipay.item_id')
             ->whereNull('ipay.id')
             ->where('winnerib.user_id',$user->id)
+            ->where('items.enddt < ',date("Y-m-d H:i:s"))
             ->orderBy('items.created_at','desc')
             ->get();
+            $close_itemids=[];
+            foreach($sql as $row){
+                if($row->bidstatus=='open'){
+                    $row->bidstatus='closed';
+                    $close_itemids[]=$row->id;
+                }
+            }
+            if(!empty($close_itemids)){
+                Item::whereIn('id',$close_itemids)->update([
+                    'bidstatus'=>'closed'
+                ]);
+            }
+            
             ResponseService::successResponse("Waiting Payment Fetched", $sql);
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);

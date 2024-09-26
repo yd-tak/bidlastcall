@@ -20,7 +20,13 @@ class ItemController extends Controller {
         ResponseService::noAnyPermissionThenRedirect(['item-list', 'item-update', 'item-delete']);
         return view('items.index');
     }
+    public function getSales(Request $request){
 
+        $items=Item::orderBy('id','desc')->get();
+        return view('items.index',[
+            
+        ]);
+    }
     public function show(Request $request) {
         try {
             ResponseService::noPermissionThenSendJson('item-list');

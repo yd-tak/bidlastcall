@@ -14,6 +14,7 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PlaceController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportReasonController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
@@ -124,6 +125,7 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
     /*** Item Module : START ***/
     Route::group(['prefix' => 'item'], static function () {
         Route::put('/{id}/approval', [ItemController::class, 'updateItemApproval'])->name('item.approval');
+        Route::put('/sales', [ItemController::class, 'getSales'])->name('item.indexsales');
     });
     Route::resource('item', ItemController::class);
     /*** Item Module : END ***/
@@ -271,6 +273,13 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
         Route::get('/show', [Controller::class, 'contactUsShow'])->name('contact-us.show');
     });
     /*** Area Module : END ***/
+
+    /*** Report Module : START ***/
+    Route::group(['prefix' => 'report'], static function () {
+        Route::put('/pnl', [ReportController::class, 'getPnl'])->name('report.pnl');
+    });
+    /*** Report Module : END ***/
+
 });
 Route::get('/migrate', static function () {
     Artisan::call('migrate');
@@ -299,3 +308,4 @@ Route::get('clear', static function () {
 Route::get('storage-link', static function () {
     Artisan::call('storage:link');
 });
+
