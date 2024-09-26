@@ -503,7 +503,7 @@ class ApiController extends Controller {
                 'shippingfee'=>$request->shippingfee,
                 'shippingetd'=>$request->shippingetd,
                 'shippingservice'=>$request->shippingservice,
-                'totalcloseprice'=>$item->closeprice+$request->shippingfee-$request->servicefee
+                'totalcloseprice'=>$item->closeprice+$request->shippingfee
             ]);
 
             DB::commit();
