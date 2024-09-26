@@ -77,7 +77,7 @@ class Item extends Model {
             $updateData['closeprice']=$closeprice;
             $updateData['servicefee']=$servicefee->fee;
             $updateData['totalcloseprice']=$totalcloseprice;
-            var_dump($updateData);
+            // var_dump($updateData);
             Self::where('id',$id)->update($updateData);
         }
 
