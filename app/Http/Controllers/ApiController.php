@@ -402,19 +402,24 @@ class ApiController extends Controller {
     }
     public function getItemDetail(Request $request){
         try{
+            Item::closeItem($request->item_id);
             $item=Item::with('user:id,seller_uname,subdistrictid','item_bid:id,user_id,bid_amount,bid_price,tipe,created_at','item_payment','category:id,name,image', 'gallery_images:id,image,item_id')->where('id',$request->item_id)->first();
             if($item==null){
                 throw new \Exception("Item not found");
             }
-            $buyer=Auth::user();
+
             // $item->bidstatus='open';
             $currbidstatus=$item->bidstatus;
             if($item->item_bid!=null){
                 $winner=User::where('id',$item->item_bid->user_id)->first();
                 $item->item_bid->winner_uname=$winner->buyer_uname;
+                $item->item_bid->winner_address=$winner->address;
                 if($item->item_bid->tipe=='buy'){
                     $item->bidstatus='closed';
                 }
+                $ongkirOpts=$this->getOngkir($item->user->subdistrictid,$winner->subdistrictid,$item->weight);
+                $item->ongkirOpts=$ongkirOpts;
+            
 
             }
             if($item->bidstatus=='open' && $item->enddt<$this->now){
@@ -426,8 +431,6 @@ class ApiController extends Controller {
             // var_dump($buyer);exit;
             $itembids=ItemBid::with('user:id,buyer_uname')->where('item_id',$request->item_id)->get();
             $item->bids=$itembids;
-            $ongkirOpts=$this->getOngkir($item->user->subdistrictid,$buyer->subdistrictid,$item->weight);
-            $item->ongkirOpts=$ongkirOpts;
             ResponseService::successResponse("Item Detail", $item);
         } catch (\Exception $e) {
             // ResponseService::logErrorResponse($e, "API Controller -> bidItem");
@@ -446,6 +449,9 @@ class ApiController extends Controller {
                 'paymentdate' => 'required',
                 'amount' => 'required|integer',
                 'accnum' => 'required',
+                'shippingservice'=>'required',
+                'shippingfee'=>'required',
+                'shippingetd'=>'required'
             ]);
             if ($validator->fails()) {
                 ResponseService::validationError($validator->errors()->first());
@@ -487,6 +493,12 @@ class ApiController extends Controller {
                 'status'=>'review'
             ];
             $item_payment=ItemPayment::create($data);
+            Item::where('id',$request->item_id)->update([
+                'shippingfee'=>$request->shippingfee,
+                'shippingetd'=>$request->shippingetd,
+                'shippingservice'=>$request->shippingservice,
+                'totalcloseprice'=>$item->closeprice+$request->shippingfee-$request->servicefee
+            ]);
 
             DB::commit();
 
@@ -2028,6 +2040,22 @@ class ApiController extends Controller {
                 'bidstatus'=>'open'
             ]);
             ResponseService::successResponse("Bid History Fetched", $bidHistories);
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e);
+            ResponseService::errorResponse();
+        }
+    }
+    public function getWaitingPayment(Request $request) {
+        try {
+            $user = Auth::user();
+            $sql = Item::select('items.*','winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_payment')
+            ->join('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
+            ->leftJoin('item_payments as ipay','items.id','=','ipay.item_id')
+            ->whereNull('ipay.id')
+            ->where('winnerib.user_id',$user->id)
+            ->orderBy('items.created_at','desc')
+            ->get();
+            ResponseService::successResponse("Waiting Payment Fetched", $sql);
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);
             ResponseService::errorResponse();

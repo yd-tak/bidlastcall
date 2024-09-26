@@ -19,7 +19,10 @@ class ItemPayment extends Model {
         'paymentdate',
         'amount',
         'accnum',
-        'status'
+        'status',
+        'shippingfee',
+        'shippingetd',
+        'shippingservice'
     ];
     public function item(){
         return $this->belongsTo(Item::class);

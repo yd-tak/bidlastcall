@@ -48,6 +48,7 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
 
     Route::get('bid-history', [ApiController::class, 'getBidHistory']);//ini histori bid
     Route::get('sell-history', [ApiController::class, 'getSellHistory']);//ini histori bid
+    Route::get('waiting-payment', [ApiController::class, 'getWaitingPayment']);//ini waiting payment winner
 
 
 
