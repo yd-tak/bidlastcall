@@ -85,7 +85,7 @@
                                             <td><?=($row->item_payment==null)?'Buyer belum bayar':"<a href=\"javascript:viewpayment(".$row->item_payment->id.",'".$row->item_payment->img."','".$row->item_payment->status."')\">".($row->item_payment->status=='review'?'Menunggu Review':'Lunas')."</a>"?></td>
                                             <td><?=number_format($row->servicefee)?></td>
                                             <td><?=number_format($row->totalcloseprice)?></td>
-                                            <td><?=($row->item_payment==null)?'Buyer belum bayar':($row->item_payment->status=='review'?'Review Pembayaran Dulu':"<a href=\"javascript:viewpaymenttransfer(".$row->item_payment->id.",'".$row->item_payment->imgtransfer."',".$row->item_payment->istransfered."')\">".($row->item_payment->istransfered?'Belum Transfer':'Sudah Transfer'))."</a>"?></td>
+                                            <td><?=($row->item_payment==null)?'Buyer belum bayar':($row->item_payment->status=='review'?'Review Pembayaran Dulu':"<a href=\"javascript:viewpaymenttransfer(".$row->item_payment->id.",'".$row->item_payment->imgtransfer."',".$row->item_payment->istransfered.")\">".($row->item_payment->istransfered?'Sudah Transfer':'Belum Transfer'))."</a>"?></td>
                                         <?php } ?>
                                     </tr>
                                 <?php } ?>
@@ -125,6 +125,33 @@
             </div>
             <!-- /.modal-content -->
         </div>
+        <div id="viewTransferModal" class="modal fade" tabindex="-1" role="dialog" 
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="myModalLabel1">View/Review Pencairan Seller <span id="view-transfer-status"></span></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <?php echo Form::open(array('route' => 'item.reviewpaymenttransfer','enctype'=>'multipart/form-data'));?>
+                            @csrf
+                            <input type="hidden" name="id" id="view-transfer-id">
+                            <div class="row" id="view-transfer-img-opt">
+                                <div class="col-md-12">
+                                    <?php echo Form::file('image');?>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <img src="#" id="view-transfer-img" style="max-height: 400px;">
+                            </div>
+                            <input type="submit" value="Save" class="btn btn-primary mt-3" id="view-transfer-submit">
+                        <?php echo Form::close();?>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
     </section>
 @endsection
 @section('js')
@@ -142,8 +169,19 @@
             }
             $("#view-payment-img").prop("src",img);
             $('#viewPaymentModal').modal('show');
-
         }
-
+        function viewpaymenttransfer(id,img,istransfered) {
+            $("#view-transfer-id").val(id);
+            if(!istransfered){
+                $("#view-transfer-status-opt").css("display","block");
+                $("#view-transfer-submit").css("display","block");
+            }
+            else{
+                $("#view-transfer-status-opt").css("display","none");
+                $("#view-transfer-submit").css("display","none");
+            }
+            $("#view-transfer-img").prop("src",img);
+            $('#viewTransferModal').modal('show');
+        }
     </script>
 @endsection

@@ -48,6 +48,21 @@ class ItemController extends Controller {
         return redirect('/item/sales');
 
     }
+    public function reviewPaymentTransfer(Request $request){
+        $now=date("Y-m-d H:i:s");
+        $data['istransfered']=1;
+        $data['transfer_at']=$now;
+        if ($request->hasFile('image')) {
+            $data['imgtransfer'] = FileService::compressAndUpload($request->file('image'), 'item_payments');
+        }
+        else{
+            echo "NO FILE";exit;
+        }
+
+        ItemPayment::where('id',$request->id)->update($data);
+        return redirect('/item/sales');
+
+    }
     public function show(Request $request) {
         try {
             ResponseService::noPermissionThenSendJson('item-list');

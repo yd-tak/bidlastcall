@@ -27,7 +27,8 @@ class ItemPayment extends Model {
         'imgtransfer',
         'istransfered',
         'estimate_payment_at',
-        'approve_at'
+        'approve_at',
+        'transfer_at'
     ];
     public function item(){
         return $this->belongsTo(Item::class);
