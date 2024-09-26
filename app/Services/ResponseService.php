@@ -146,7 +146,7 @@ class ResponseService
         ], $customData))->send();
         exit();
     }
-    public static function blockedresponse(string $message = 'Your account are blocked, please contact admin.', $data = null, string|int $code = null, $e = null)
+    public static function blockedresponse(string $message = 'Akun anda terblokir, silahkan hubungi admin untuk tindakan lebih lanjut.', $data = null, string|int $code = null, $e = null)
     {
         response()->json([
             'error'   => false,
