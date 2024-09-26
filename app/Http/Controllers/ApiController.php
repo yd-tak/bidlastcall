@@ -428,9 +428,12 @@ class ApiController extends Controller {
             if($currbidstatus=='open' && $item->bidstatus=='closed'){
                 Item::where('id',$item->id)->first()->save(['bidstatus'=>'closed']);
             }
+            // exit;
             // var_dump($buyer);exit;
             $itembids=ItemBid::with('user:id,buyer_uname')->where('item_id',$request->item_id)->get();
+            // exit;
             $item->bids=$itembids;
+            // var_dump($item);
             ResponseService::successResponse("Item Detail", $item);
         } catch (\Exception $e) {
             // ResponseService::logErrorResponse($e, "API Controller -> bidItem");
@@ -489,7 +492,7 @@ class ApiController extends Controller {
             if ($request->hasFile('uploadProof')) {
                 $img = FileService::compressAndUpload($request->file('uploadProof'), 'item_payments');
             }
-            
+            $totalamount=$request->amount+$request->shippingfee;
             $data = [
                 ...$request->all(),
                 'item_bid_id'=>$winner_bid->id,
@@ -500,7 +503,8 @@ class ApiController extends Controller {
             Item::where('id',$request->item_id)->update([
                 'shippingfee'=>$request->shippingfee,
                 'shippingetd'=>$request->shippingetd,
-                'shippingservice'=>$request->shippingservice
+                'shippingservice'=>$request->shippingservice,
+                'totalamount'=>$totalamount
             ]);
             Item::closeItem($request->item_id);
             DB::commit();

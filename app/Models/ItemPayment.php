@@ -43,10 +43,10 @@ class ItemPayment extends Model {
         return $img;
     }
     public function getImgtransferAttribute($imgtransfer) {
-        if (!empty($img)) {
+        if (!empty($imgtransfer)) {
             return url(Storage::url($imgtransfer));
         }
-        return $img;
+        return $imgtransfer;
     }
 
     
