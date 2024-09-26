@@ -353,12 +353,60 @@ class ApiController extends Controller {
         fclose($file);
         ResponseService::successResponse("Bid Opened", $item);
     }
+    private function getOngkir($origin,$destination,$weight){
+        $weight=$weight*1000;
+        $curl = curl_init();
+        $postfields="origin=".$origin."&originType=subdistrict&destination=".$destination."&destinationType=subdistrict&weight=".$weight."&courier=jne:pos:tiki";
+        // echo "postfileds = ".$postfields;
+        curl_setopt_array($curl, array(
+          CURLOPT_URL => "https://pro.rajaongkir.com/api/cost",
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => "",
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 30,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => "POST",
+          CURLOPT_POSTFIELDS => $postfields,
+          CURLOPT_HTTPHEADER => array(
+            "content-type: application/x-www-form-urlencoded",
+            "key: 6c40c9e500d3c6a07eab54e5a39b978e"
+          ),
+        ));
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+
+        curl_close($curl);
+        $ongkir=json_decode($response);
+        // var_dump($ongkir);
+        $ongkirOpts=['JNE'=>[],'POS'=>[],'TIKI'=>[]];
+        if(isset($ongkir->rajaongkir)){
+            foreach($ongkir->rajaongkir->results as $tipeongkir){
+                $courier=strtoupper($tipeongkir->code);
+                if(!empty($tipeongkir->costs)){
+                    foreach($tipeongkir->costs as $ongkirrow){
+
+                        $ongkirOpts[$courier][]=(object)[
+                            'courier'=>$courier,
+                            'service'=>$ongkirrow->service.' - '.$ongkirrow->description,
+                            'serviceid'=>$courier.' - '.$ongkirrow->service.' - '.$ongkirrow->description,
+                            'cost'=>$ongkirrow->cost[0]->value,
+                            'etd'=>$ongkirrow->cost[0]->etd
+                        ];
+                    }
+                }
+            }
+        }
+        return $ongkirOpts;
+
+    }
     public function getItemDetail(Request $request){
         try{
-            $item=Item::with('user:id,seller_uname','item_bid:id,user_id,bid_amount,bid_price,tipe,created_at','item_payment','category:id,name,image', 'gallery_images:id,image,item_id')->where('id',$request->item_id)->first();
+            $item=Item::with('user:id,seller_uname,subdistrictid','item_bid:id,user_id,bid_amount,bid_price,tipe,created_at','item_payment','category:id,name,image', 'gallery_images:id,image,item_id')->where('id',$request->item_id)->first();
             if($item==null){
                 throw new \Exception("Item not found");
             }
+            $buyer=Auth::user();
             // $item->bidstatus='open';
             $currbidstatus=$item->bidstatus;
             if($item->item_bid!=null){
@@ -375,9 +423,11 @@ class ApiController extends Controller {
             if($currbidstatus=='open' && $item->bidstatus=='closed'){
                 Item::where('id',$item->id)->first()->save(['bidstatus'=>'closed']);
             }
-
+            // var_dump($buyer);exit;
             $itembids=ItemBid::with('user:id,buyer_uname')->where('item_id',$request->item_id)->get();
             $item->bids=$itembids;
+            $ongkirOpts=$this->getOngkir($item->user->subdistrictid,$buyer->subdistrictid,$item->weight);
+            $item->ongkirOpts=$ongkirOpts;
             ResponseService::successResponse("Item Detail", $item);
         } catch (\Exception $e) {
             // ResponseService::logErrorResponse($e, "API Controller -> bidItem");
