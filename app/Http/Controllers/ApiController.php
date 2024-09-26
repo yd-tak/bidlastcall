@@ -2000,7 +2000,7 @@ class ApiController extends Controller {
                 $haswinner=false;
                 $hasclosed=false;
                 $enddt=new \DateTime($row->enddt);
-                if($enddt>$now){
+                if($enddt<$now){
                     $hasclosed=true;
                     if($row->winner_bid_price!=null){
                         $haswinner=true;
