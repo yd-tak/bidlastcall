@@ -22,7 +22,10 @@ class ItemPayment extends Model {
         'status',
         'shippingfee',
         'shippingetd',
-        'shippingservice'
+        'shippingservice',
+        'img',
+        'imgtransfer',
+        'istransfered'
     ];
     public function item(){
         return $this->belongsTo(Item::class);

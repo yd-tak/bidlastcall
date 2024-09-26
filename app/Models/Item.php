@@ -82,6 +82,43 @@ class Item extends Model {
         }
 
     }
+    public static function parseStatus($items){
+        foreach($items as $row){
+            $row->statusparse='';
+            $row->statusparsestr='';
+            if($row->bidstatus=='open'){
+                $row->statusparse='open-bid';
+                $row->statusparsestr='Open Bid';
+            }
+            elseif($row->bidstatus=='closed'){
+                if($row->winnerbidid!=null){
+                    if($row->item_payment==null){
+                        $row->statusparse='waiting-payment';
+                        $row->statusparsestr='Menunggu Pembayaran';
+                    }
+                    elseif($row->item_payment->status=='review'){
+                        $row->statusparse='review-payment';
+                        $row->statusparsestr='Review Pembayaran';
+                    }
+                    elseif($row->item_payment->status=='approve'){
+                        if(!$row->item_payment->istransfered){
+                            $row->statusparse='transfer-seller';
+                            $row->statusparsestr='Transfer Seller';
+                        }
+                        else{
+                            $row->statusparse='completed';
+                            $row->statusparsestr='Selesai';
+                        }
+                    }
+                }
+                else{
+                    $row->statusparse='not-sold';
+                    $row->statusparsestr='Tidak Terjual';
+                }
+            }
+        }
+        return $items;
+    }
 
     public function gallery_images() {
         return $this->hasMany(ItemImages::class);

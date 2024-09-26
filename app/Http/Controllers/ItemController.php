@@ -21,10 +21,10 @@ class ItemController extends Controller {
         return view('items.index');
     }
     public function getSales(Request $request){
-
-        $items=Item::orderBy('id','desc')->get();
-        return view('items.index',[
-            
+        $items=Item::with('user:id,seller_uname','item_bid:id,user_id,bid_price','item_payment:id,img,status,istransfered,imgtransfer')->select('items.*','buyer.buyer_uname')->leftJoin('item_bids as ib','items.winnerbidid','=','ib.id')->leftJoin('users as buyer','ib.user_id','=','buyer.id')->get();
+        $itesm=Item::parseStatus($items);
+        return view('items.indexSales',[
+            'items'=>$items
         ]);
     }
     public function show(Request $request) {

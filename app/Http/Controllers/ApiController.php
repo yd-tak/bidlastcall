@@ -487,10 +487,16 @@ class ApiController extends Controller {
             if($request->amount!=$winner_bid->bid_price){
                 throw new \Exception("You must pay what you bid for: Rp ".number_format($winner_bid->bid_price));
             }
+            $img=null;
+            if ($request->hasFile('uploadProof')) {
+                $img = FileService::compressAndUpload($request->file('uploadProof'), 'item_payments');
+            }
+            
             $data = [
                 ...$request->all(),
                 'item_bid_id'=>$winner_bid->id,
-                'status'=>'review'
+                'status'=>'review',
+                'img'=>$img
             ];
             $item_payment=ItemPayment::create($data);
             Item::where('id',$request->item_id)->update([
