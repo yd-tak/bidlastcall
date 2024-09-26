@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\ItemBid;
+use App\Models\ServiceFee;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -38,7 +40,11 @@ class Item extends Model {
         'city',
         'area_id',
         'all_category_ids',
-        'slug'
+        'slug',
+        'servicefee',
+        'shippingfee',
+        'closeprice',
+        'totalcloseprice'
     ];
 
     // Relationships
@@ -54,6 +60,27 @@ class Item extends Model {
 
     public function category() {
         return $this->belongsTo(Category::class, 'category_id', 'id');
+    }
+    public static function closeItem($id){
+        $item=Self::where('id',$id)->first();
+        // echo "CLOSING : ".$item->id."<br>";
+        $now=date("Y-m-d H:i:s");
+        $updateData=[];
+        if($item->bidstatus=='open' && $item->enddt<$now){
+            $updateData['bidstatus']='closed';
+        }
+        if($item->winnerbidid!=null){
+            $winnerbid=ItemBid::where('id',$item->winnerbidid)->first();
+            $closeprice=$winnerbid->bid_price;
+            $servicefee=ServiceFee::where('minprice','<',$closeprice)->where('maxprice','>',$closeprice)->first();
+            $totalcloseprice=$closeprice+$item->shippingfee-$servicefee->fee;
+            $updateData['closeprice']=$closeprice;
+            $updateData['servicefee']=$servicefee->fee;
+            $updateData['totalcloseprice']=$totalcloseprice;
+            var_dump($updateData);
+            Self::where('id',$id)->update($updateData);
+        }
+
     }
 
     public function gallery_images() {

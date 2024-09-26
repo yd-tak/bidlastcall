@@ -34,6 +34,7 @@ use App\Models\PaymentTransaction;
 use App\Models\Pg;
 use App\Models\ReportReason;
 use App\Models\Setting;
+use App\Models\ServieFee;
 use App\Models\Slider;
 use App\Models\SocialLogin;
 use App\Models\State;
@@ -139,7 +140,7 @@ class ApiController extends Controller {
                 ]);
                 $user->syncRoles('User');
                 Auth::login($user);
-                $auth = User::find($user->id);
+                $auth = User::where('id',$user->id);
                 DB::commit();
             } else {
                 Auth::login($socialLogin->user);
@@ -361,7 +362,7 @@ class ApiController extends Controller {
             // $item->bidstatus='open';
             $currbidstatus=$item->bidstatus;
             if($item->item_bid!=null){
-                $winner=User::find($item->item_bid->user_id)->first();
+                $winner=User::where('id',$item->item_bid->user_id)->first();
                 $item->item_bid->winner_uname=$winner->buyer_uname;
                 if($item->item_bid->tipe=='buy'){
                     $item->bidstatus='closed';
@@ -372,7 +373,7 @@ class ApiController extends Controller {
                 $item->bidstatus='closed';
             }
             if($currbidstatus=='open' && $item->bidstatus=='closed'){
-                Item::find($item->id)->first()->save(['bidstatus'=>'closed']);
+                Item::where('id',$item->id)->first()->save(['bidstatus'=>'closed']);
             }
 
             $itembids=ItemBid::with('user:id,buyer_uname')->where('item_id',$request->item_id)->get();
@@ -412,7 +413,7 @@ class ApiController extends Controller {
             if($item->item_payment!=null){
                 throw new \Exception("This item have pending payment for review / have been paid");
             }
-            $winner=User::find($item->item_bid->user_id)->first();
+            $winner=User::where('id',$item->item_bid->user_id)->first();
             $winner_bid=$item->item_bid;
             $item->item_bid->winner_uname=$winner->buyer_uname;
             if($item->item_bid->tipe=='buy'){
@@ -559,6 +560,7 @@ class ApiController extends Controller {
             ResponseService::errorResponse($e->getMessage());
         }
     }
+    
     public function addItem(Request $request) {
         //bidprice, startbidprice, multiplebidprice, startbid, enddate
         try {
@@ -608,7 +610,6 @@ class ApiController extends Controller {
             if ($request->hasFile('image')) {
                 $data['image'] = FileService::compressAndUpload($request->file('image'), $this->uploadFolder);
             }
-
             $item = Item::create($data);
 
             BidcoinBalance::create([
@@ -1465,11 +1466,11 @@ class ApiController extends Controller {
                     try {
                         $paymentIntent = PaymentService::create($data->payment_gateway)->retrievePaymentIntent($data->order_id);
                     } catch (Throwable) {
-                        PaymentTransaction::find($data->id)->update(['payment_status' => "failed"]);
+                        PaymentTransaction::where('id',$data->id)->update(['payment_status' => "failed"]);
                     }
 
                     if (!empty($paymentIntent) && $paymentIntent['status'] != "pending") {
-                        PaymentTransaction::find($data->id)->update(['payment_status' => $paymentIntent['status'] ?? "failed"]);
+                        PaymentTransaction::where('id',$data->id)->update(['payment_status' => $paymentIntent['status'] ?? "failed"]);
                     }
                 }
                 return $data;
@@ -1973,9 +1974,6 @@ class ApiController extends Controller {
                 }
                 $bidHistories[]=$row;
             }
-            Item::whereIn('id',$close_itemids)->update([
-                'bidstatus'=>'closed'
-            ]);
             Item::whereIn('id',$open_itemids)->update([
                 'bidstatus'=>'open'
             ]);
@@ -2027,6 +2025,21 @@ class ApiController extends Controller {
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);
             ResponseService::errorResponse();
+        }
+    }
+    public function cronCloseItems(Request $request){
+        $now=date("Y-m-d H:i:s");
+        $items=Item::where('enddt','<',$now)->get();
+        // var_dump($items);
+        foreach($items as $row){
+            if($row->bidstatus=='open'){
+                Item::closeItem($row->id);
+                echo "close1: ".$row->id."<br>";
+            }
+            elseif($row->bidstatus=='closed' && $row->closeprice==null && $row->winnerbidid!=null){
+                Item::closeItem($row->id);
+                echo "close2: ".$row->id."<br>";
+            }
         }
     }
 }
