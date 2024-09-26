@@ -1,0 +1,560 @@
+{
+	"info": {
+		"_postman_id": "61ece2a3-ea64-4da8-8b4c-d14fd53fb757",
+		"name": "Last Call API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25965158",
+		"_collection_link": "https://crimson-satellite-224259.postman.co/workspace/Passion~b9eb707b-5fa2-497a-8dd5-382adca2f0e7/collection/25965158-61ece2a3-ea64-4da8-8b4c-d14fd53fb757?action=share&source=collection_link&creator=25965158"
+	},
+	"item": [
+		{
+			"name": "Get Package",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer 3|OCpIu36cQysA1lZtT1wcW35yjz3prLtIdPgVS8Ha7167ef12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Test\",\n  \"slug\": \"testty\",\n  \"description\": \"Deskripsi test\",\n  \"category_id\": \"97\",\n  \"price\": \"100000\",\n  \"contact\": \"98089000833\",\n  \"all_category_ids\": \"13,97\",\n  \"address\": \"Cibeber I, Kecamatan Leuwiliang, Jawa Barat, Indonesia\",\n  \"latitude\": \"-6.5732859\",\n  \"longitude\": \"106.6238796\",\n  \"country\": \"Indonesia\",\n  \"city\": \"Kecamatan Leuwiliang\",\n  \"state\": \"Jawa Barat\",\n  \"show_only_to_premium\": \"1\",\n  \"gallery_images[]\": \"[application/octet-stream; filename=scaled_1000304620_out.jpg; length=144332]\",\n  \"image\": \"[application/octet-stream; filename=1000305435_out.jpg; length=107845]\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://bidlastcall.com/api/get-bidcoin-package",
+					"protocol": "http",
+					"host": [
+						"bidlastcall",
+						"com"
+					],
+					"path": [
+						"api",
+						"get-bidcoin-package"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Item",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer 3|OCpIu36cQysA1lZtT1wcW35yjz3prLtIdPgVS8Ha7167ef12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Test\",\n  \"slug\": \"testty\",\n  \"description\": \"Deskripsi test\",\n  \"category_id\": \"97\",\n  \"price\": \"100000\",\n  \"contact\": \"98089000833\",\n  \"all_category_ids\": \"13,97\",\n  \"address\": \"Cibeber I, Kecamatan Leuwiliang, Jawa Barat, Indonesia\",\n  \"latitude\": \"-6.5732859\",\n  \"longitude\": \"106.6238796\",\n  \"country\": \"Indonesia\",\n  \"city\": \"Kecamatan Leuwiliang\",\n  \"state\": \"Jawa Barat\",\n  \"show_only_to_premium\": \"1\",\n  \"gallery_images[]\": \"[application/octet-stream; filename=scaled_1000304620_out.jpg; length=144332]\",\n  \"image\": \"[application/octet-stream; filename=1000305435_out.jpg; length=107845]\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://bidlastcall.com/api/get-bidcoin-package",
+					"protocol": "http",
+					"host": [
+						"bidlastcall",
+						"com"
+					],
+					"path": [
+						"api",
+						"get-bidcoin-package"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Bid History",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer 3|OCpIu36cQysA1lZtT1wcW35yjz3prLtIdPgVS8Ha7167ef12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Test\",\n  \"slug\": \"testty\",\n  \"description\": \"Deskripsi test\",\n  \"category_id\": \"97\",\n  \"price\": \"100000\",\n  \"contact\": \"98089000833\",\n  \"all_category_ids\": \"13,97\",\n  \"address\": \"Cibeber I, Kecamatan Leuwiliang, Jawa Barat, Indonesia\",\n  \"latitude\": \"-6.5732859\",\n  \"longitude\": \"106.6238796\",\n  \"country\": \"Indonesia\",\n  \"city\": \"Kecamatan Leuwiliang\",\n  \"state\": \"Jawa Barat\",\n  \"show_only_to_premium\": \"1\",\n  \"gallery_images[]\": \"[application/octet-stream; filename=scaled_1000304620_out.jpg; length=144332]\",\n  \"image\": \"[application/octet-stream; filename=1000305435_out.jpg; length=107845]\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://bidlastcall.com/api/get-bidcoin-package",
+					"protocol": "http",
+					"host": [
+						"bidlastcall",
+						"com"
+					],
+					"path": [
+						"api",
+						"get-bidcoin-package"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sell History",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer 3|OCpIu36cQysA1lZtT1wcW35yjz3prLtIdPgVS8Ha7167ef12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Test\",\n  \"slug\": \"testty\",\n  \"description\": \"Deskripsi test\",\n  \"category_id\": \"97\",\n  \"price\": \"100000\",\n  \"contact\": \"98089000833\",\n  \"all_category_ids\": \"13,97\",\n  \"address\": \"Cibeber I, Kecamatan Leuwiliang, Jawa Barat, Indonesia\",\n  \"latitude\": \"-6.5732859\",\n  \"longitude\": \"106.6238796\",\n  \"country\": \"Indonesia\",\n  \"city\": \"Kecamatan Leuwiliang\",\n  \"state\": \"Jawa Barat\",\n  \"show_only_to_premium\": \"1\",\n  \"gallery_images[]\": \"[application/octet-stream; filename=scaled_1000304620_out.jpg; length=144332]\",\n  \"image\": \"[application/octet-stream; filename=1000305435_out.jpg; length=107845]\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://bidlastcall.com/api/get-bidcoin-package",
+					"protocol": "http",
+					"host": [
+						"bidlastcall",
+						"com"
+					],
+					"path": [
+						"api",
+						"get-bidcoin-package"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get PG",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer 3|OCpIu36cQysA1lZtT1wcW35yjz3prLtIdPgVS8Ha7167ef12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Test\",\n  \"slug\": \"testty\",\n  \"description\": \"Deskripsi test\",\n  \"category_id\": \"97\",\n  \"price\": \"100000\",\n  \"contact\": \"98089000833\",\n  \"all_category_ids\": \"13,97\",\n  \"address\": \"Cibeber I, Kecamatan Leuwiliang, Jawa Barat, Indonesia\",\n  \"latitude\": \"-6.5732859\",\n  \"longitude\": \"106.6238796\",\n  \"country\": \"Indonesia\",\n  \"city\": \"Kecamatan Leuwiliang\",\n  \"state\": \"Jawa Barat\",\n  \"show_only_to_premium\": \"1\",\n  \"gallery_images[]\": \"[application/octet-stream; filename=scaled_1000304620_out.jpg; length=144332]\",\n  \"image\": \"[application/octet-stream; filename=1000305435_out.jpg; length=107845]\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://bidlastcall.com/api/get-pgs",
+					"protocol": "http",
+					"host": [
+						"bidlastcall",
+						"com"
+					],
+					"path": [
+						"api",
+						"get-pgs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Item Detail",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer 3|OCpIu36cQysA1lZtT1wcW35yjz3prLtIdPgVS8Ha7167ef12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Test\",\n  \"slug\": \"testty\",\n  \"description\": \"Deskripsi test\",\n  \"category_id\": \"97\",\n  \"price\": \"100000\",\n  \"contact\": \"98089000833\",\n  \"all_category_ids\": \"13,97\",\n  \"address\": \"Cibeber I, Kecamatan Leuwiliang, Jawa Barat, Indonesia\",\n  \"latitude\": \"-6.5732859\",\n  \"longitude\": \"106.6238796\",\n  \"country\": \"Indonesia\",\n  \"city\": \"Kecamatan Leuwiliang\",\n  \"state\": \"Jawa Barat\",\n  \"show_only_to_premium\": \"1\",\n  \"gallery_images[]\": \"[application/octet-stream; filename=scaled_1000304620_out.jpg; length=144332]\",\n  \"image\": \"[application/octet-stream; filename=1000305435_out.jpg; length=107845]\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://bidlastcall.com/api/get-bidcoin-package",
+					"protocol": "http",
+					"host": [
+						"bidlastcall",
+						"com"
+					],
+					"path": [
+						"api",
+						"get-bidcoin-package"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Categories",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer 3|OCpIu36cQysA1lZtT1wcW35yjz3prLtIdPgVS8Ha7167ef12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Test\",\n  \"slug\": \"testty\",\n  \"description\": \"Deskripsi test\",\n  \"category_id\": \"97\",\n  \"price\": \"100000\",\n  \"contact\": \"98089000833\",\n  \"all_category_ids\": \"13,97\",\n  \"address\": \"Cibeber I, Kecamatan Leuwiliang, Jawa Barat, Indonesia\",\n  \"latitude\": \"-6.5732859\",\n  \"longitude\": \"106.6238796\",\n  \"country\": \"Indonesia\",\n  \"city\": \"Kecamatan Leuwiliang\",\n  \"state\": \"Jawa Barat\",\n  \"show_only_to_premium\": \"1\",\n  \"gallery_images[]\": \"[application/octet-stream; filename=scaled_1000304620_out.jpg; length=144332]\",\n  \"image\": \"[application/octet-stream; filename=1000305435_out.jpg; length=107845]\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://bidlastcall.com/api/get-bidcoin-package",
+					"protocol": "http",
+					"host": [
+						"bidlastcall",
+						"com"
+					],
+					"path": [
+						"api",
+						"get-bidcoin-package"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pay Item",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer 3|OCpIu36cQysA1lZtT1wcW35yjz3prLtIdPgVS8Ha7167ef12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"item_id\": 18,\n  \"pg_id\":1,\n  \"paymentdate\":\"2024-09-23\",\n  \"amount\":2000000,\n  \"accnum\":\"8831041447\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://bidlastcall.com/api/pay-item",
+					"protocol": "http",
+					"host": [
+						"bidlastcall",
+						"com"
+					],
+					"path": [
+						"api",
+						"pay-item"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Purchase Bidcoin",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer 3|OCpIu36cQysA1lZtT1wcW35yjz3prLtIdPgVS8Ha7167ef12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"bidcoin_package_id\": 1,\n  \"bank\":\"BCA\",\n  \"accountname\":\"YUDHISTIRA DEWANATA\",\n  \"accountnum\":\"1117787788\",\n  \"uploadProof\": \"\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://bidlastcall.com/api/purchase-bidcoin",
+					"protocol": "http",
+					"host": [
+						"bidlastcall",
+						"com"
+					],
+					"path": [
+						"api",
+						"purchase-bidcoin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Item",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer 3|OCpIu36cQysA1lZtT1wcW35yjz3prLtIdPgVS8Ha7167ef12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Test\",\n  \"slug\": \"testty\",\n  \"description\": \"Deskripsi test\",\n  \"category_id\": \"97\",\n  \"price\": 2000000,\n  \"contact\": \"98089000833\",\n  \"all_category_ids\": \"13,97\",\n  \"address\": \"Cibeber I, Kecamatan Leuwiliang, Jawa Barat, Indonesia\",\n  \"latitude\": \"-6.5732859\",\n  \"longitude\": \"106.6238796\",\n  \"country\": \"Indonesia\",\n  \"city\": \"Kecamatan Leuwiliang\",\n  \"state\": \"Jawa Barat\",\n  \"show_only_to_premium\": \"0\",//HARUS 0\n  \"stdt\":\"2024-09-09 12:00:00\",//HARUS YYYY-MM-DD HH:mm:ss\n  \"endt\":\"2024-09-12 12:00:00\",//HARUS YYYY-MM-DD HH:mm:ss\n  \"minbid\":50000,//min kelipatan bid\n  \"startbid\":1000000//start harga bid\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://bidlastcall.com/api/add-item",
+					"protocol": "http",
+					"host": [
+						"bidlastcall",
+						"com"
+					],
+					"path": [
+						"api",
+						"add-item"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Write Bid (TEST)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer 3|OCpIu36cQysA1lZtT1wcW35yjz3prLtIdPgVS8Ha7167ef12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"item_id\": 6\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://bidlastcall.com/api/write-bid",
+					"protocol": "http",
+					"host": [
+						"bidlastcall",
+						"com"
+					],
+					"path": [
+						"api",
+						"write-bid"
+					],
+					"query": [
+						{
+							"key": "item_id",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Bid Item",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer 3|OCpIu36cQysA1lZtT1wcW35yjz3prLtIdPgVS8Ha7167ef12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"item_id\": 6,\n  \"bid_amount\":1000000,//nilai penambah bid (misal tambah 50k,100k)\n  \"bid_price\":3000000//harga setelah di tambah bid_amount\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://bidlastcall.com/api/bid-item",
+					"protocol": "http",
+					"host": [
+						"bidlastcall",
+						"com"
+					],
+					"path": [
+						"api",
+						"bid-item"
+					],
+					"query": [
+						{
+							"key": "item_id",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buy now",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer 3|OCpIu36cQysA1lZtT1wcW35yjz3prLtIdPgVS8Ha7167ef12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"item_id\": 6,\n  \"buy_price\":3000000//nilai beli sesuai item.price\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://bidlastcall.com/api/buy-now",
+					"protocol": "http",
+					"host": [
+						"bidlastcall",
+						"com"
+					],
+					"path": [
+						"api",
+						"buy-now"
+					],
+					"query": [
+						{
+							"key": "item_id",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
