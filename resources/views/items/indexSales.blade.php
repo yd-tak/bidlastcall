@@ -39,7 +39,7 @@
                                data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
                                data-show-columns="true" data-show-refresh="true" data-fixed-columns="true"
                                data-fixed-number="1" data-fixed-right-number="1" data-trim-on-search="false"
-                               data-escape="true"
+
                                data-responsive="true" data-sort-name="id" data-sort-order="desc"
                                data-pagination-successively-size="3" data-table="items" data-status-column="deleted_at"
                                data-show-export="true" data-export-options='{"fileName": "item-list","ignoreColumn": ["operate"]}' data-export-types="['pdf','json', 'xml', 'csv', 'txt', 'sql', 'doc', 'excel']"
@@ -82,10 +82,10 @@
                                             <td><?=number_format($row->closeprice)?></td>
                                             <td><?=($row->shippingservice==null)?'Belum pilih ongkir':number_format($row->shippingfee)?></td>
                                             <td><?=number_format($row->buyerbillprice)?></td>
-                                            <td><?=($row->item_payment==null)?'Buyer belum bayar':"<a href='javascript:viewpayment(".$row->item_payment->id.",'<?=$row->item_payment->img?>','<?=$row->item_payment->status')'>".($row->item_payment->status=='review'?'Menunggu Review':'Lunas')."</a>"?></td>
+                                            <td><?=($row->item_payment==null)?'Buyer belum bayar':"<a href=\"javascript:viewpayment(".$row->item_payment->id.",'".$row->item_payment->img."','".$row->item_payment->status."')\">".($row->item_payment->status=='review'?'Menunggu Review':'Lunas')."</a>"?></td>
                                             <td><?=number_format($row->servicefee)?></td>
                                             <td><?=number_format($row->totalcloseprice)?></td>
-                                            <td><?=($row->item_payment==null)?'Buyer belum bayar':"<a href='javascript:viewpaymenttransfer(".$row->item_payment->id.",'<?=$row->item_payment->imgtransfer?>',<?=$row->item_payment->istransfered)'>".($row->item_payment->status=='review'?'Menunggu Review':($row->item_payment->istransfered?'Belum Transfer':'Sudah Transfer'))."</a>"?></td>
+                                            <td><?=($row->item_payment==null)?'Buyer belum bayar':($row->item_payment->status=='review'?'Review Pembayaran Dulu':"<a href=\"javascript:viewpaymenttransfer(".$row->item_payment->id.",'".$row->item_payment->imgtransfer."',".$row->item_payment->istransfered."')\">".($row->item_payment->istransfered?'Belum Transfer':'Sudah Transfer'))."</a>"?></td>
                                         <?php } ?>
                                     </tr>
                                 <?php } ?>
@@ -100,24 +100,25 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="myModalLabel1">View/Review Payment <span id="payment-status"></span></h5>
+                        <h5 class="modal-title" id="myModalLabel1">View/Review Payment <span id="view-payment-status"></span></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <?php echo Form::open(array('route' => 'item.reviewpayment'));?>
                             @csrf
-                            <div class="row">
+                            <input type="hidden" name="id" id="view-payment-id">
+                            <div class="row" id="view-payment-status-opt">
                                 <div class="col-md-12">
                                     <select name="status" class="form-select" id="status" aria-label="status">
-                                        <option value="approved">Approve</option>
-                                        <option value="rejected">Reject</option>
+                                        <option value="approve">Approve</option>
+                                        <option value="reject">Reject</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-12">
                                 <img src="#" id="view-payment-img" style="max-height: 400px;">
                             </div>
-                            <input type="submit" value="Save" class="btn btn-primary mt-3">
+                            <input type="submit" value="Save" class="btn btn-primary mt-3" id="view-payment-submit">
                         <?php echo Form::close();?>
                     </div>
                 </div>
@@ -129,9 +130,18 @@
 @section('js')
     <script>
         function viewpayment(id,img,status) {
-            $("#payment-status").html(status);
-            $("#view-payment-img").src("<?=Storage::url('')?>/"+img);
-            $('#viewpayment').modal('show');
+            $("#view-payment-status").html(status);
+            $("#view-payment-id").val(id);
+            if(status=='review'){
+                $("#view-payment-status-opt").css("display","block");
+                $("#view-payment-submit").css("display","block");
+            }
+            else{
+                $("#view-payment-status-opt").css("display","none");
+                $("#view-payment-submit").css("display","none");
+            }
+            $("#view-payment-img").prop("src",img);
+            $('#viewPaymentModal').modal('show');
 
         }
 

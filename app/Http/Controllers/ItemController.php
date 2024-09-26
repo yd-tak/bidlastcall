@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use App\Models\ItemPayment;
 use App\Models\ItemCustomFieldValue;
 use App\Models\UserFcmToken;
 use App\Services\BootstrapTableService;
@@ -21,13 +22,30 @@ class ItemController extends Controller {
         return view('items.index');
     }
     public function getSales(Request $request){
-        $items=Item::with('user:id,seller_uname','item_bid:id,user_id,bid_price','item_payment:id,img,status,istransfered,imgtransfer')->select('items.*','buyer.buyer_uname')->leftJoin('item_bids as ib','items.winnerbidid','=','ib.id')->leftJoin('users as buyer','ib.user_id','=','buyer.id')->get();
-        $itesm=Item::parseStatus($items);
+        $items=Item::with('user:id,seller_uname','item_bid:id,user_id,bid_price','item_payment')->select('items.*','buyer.buyer_uname')->leftJoin('item_bids as ib','items.winnerbidid','=','ib.id')->leftJoin('users as buyer','ib.user_id','=','buyer.id')->get();
+        
+        
+        // exit;
+        $items=Item::parseStatus($items);
         return view('items.indexSales',[
             'items'=>$items
         ]);
     }
     public function reviewPayment(Request $request){
+        // var_dump($request->all());
+        if($request->status=='reject'){
+            ItemPayment::where('id',$request->id)->delete();
+        }
+        $now=date("Y-m-d H:i:s");
+        $estimate_payment_at=new \DateTime();
+        $estimate_payment_at->modify("+2 day");
+
+        ItemPayment::where('id',$request->id)->update([
+            'status'=>'approve',
+            'approve_at'=>date("Y-m-d H:i:s"),
+            'estimate_payment_at'=>$estimate_payment_at->format("Y-m-d")
+        ]);
+        return redirect('/item/sales');
 
     }
     public function show(Request $request) {
