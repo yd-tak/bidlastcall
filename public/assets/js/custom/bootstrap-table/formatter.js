@@ -53,8 +53,11 @@ function itemStatusFormatter(value) {
         badgeClass = 'danger';
         badgeText = 'Rejected';
     } else if (value == "sold out") {
-        badgeClass = 'warning';
+        badgeClass = 'success';
         badgeText = 'Sold Out';
+    } else if (value == "not paid") {
+        badgeClass = 'danger';
+        badgeText = 'Sold - Not Paid';
     } else if (value == "featured") {
         badgeClass = 'black';
         badgeText = 'Featured';

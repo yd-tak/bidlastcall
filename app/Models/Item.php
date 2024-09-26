@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\ItemBid;
+use App\Models\ItemPayment;
 use App\Models\ServiceFee;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -44,7 +45,8 @@ class Item extends Model {
         'servicefee',
         'shippingfee',
         'closeprice',
-        'totalcloseprice'
+        'totalcloseprice',
+        'expire_payment_at'
     ];
 
     // Relationships
@@ -68,8 +70,14 @@ class Item extends Model {
         $updateData=[];
         if($item->bidstatus=='open' && $item->enddt<$now){
             $updateData['bidstatus']='closed';
+            $item->bidstatus='closed';
+            
         }
-        if($item->winnerbidid!=null){
+        if($item->bidstatus=='closed' && $item->winnerbidid!=null){
+            $expire_payment_at=new \DateTime($item->enddt);
+            $expire_payment_at->modify("+2 hour");
+            $updateData['expire_payment_at']=$expire_payment_at->format("Y-m-d H:i:s");
+
             $winnerbid=ItemBid::where('id',$item->winnerbidid)->first();
             $closeprice=$winnerbid->bid_price;
             $servicefee=ServiceFee::where('minprice','<',$closeprice)->where('maxprice','>',$closeprice)->first();
@@ -77,6 +85,11 @@ class Item extends Model {
             $updateData['servicefee']=$servicefee->fee;
             $updateData['buyerbillprice']=$closeprice+$item->shippingfee+$servicefee->fee;
             $updateData['totalcloseprice']=$closeprice+$item->shippingfee;
+
+            $payment=ItemPayment::where('item_id',$item->id)->first();
+            if($now>$expire_payment_at->format("Y-m-d H:i:s") && $payment==null){
+                $updateData['status']='not paid';
+            }
             // var_dump($updateData);
             Self::where('id',$id)->update($updateData);
         }
