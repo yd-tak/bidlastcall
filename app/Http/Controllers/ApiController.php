@@ -680,7 +680,8 @@ class ApiController extends Controller {
             fwrite($file,json_encode([
                 'time_limit'=>$item->enddt,
                 'last_price'=>$item->startbid,
-                'status'=>'open'
+                'status'=>'open',
+                'bidder_uname'=>null
             ]));
             fclose($file);
 

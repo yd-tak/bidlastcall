@@ -18,7 +18,8 @@ class ItemPayment extends Model {
         'pg_id',
         'paymentdate',
         'amount',
-        'accnum'
+        'accnum',
+        'status'
     ];
     public function item(){
         return $this->belongsTo(Item::class);
