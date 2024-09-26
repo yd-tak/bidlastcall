@@ -1963,7 +1963,7 @@ class ApiController extends Controller {
                 }
                 $now=new \DateTime();
                 $enddt=new \DateTime($row->enddt);
-                if($enddt>$now && $row->bidstatus=='open'){
+                if($enddt<$now && $row->bidstatus=='open'){
                     $row->bidstatus='closed';
                     $ub_itemids[]=$row->id;
                 }
