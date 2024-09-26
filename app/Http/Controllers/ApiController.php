@@ -402,7 +402,6 @@ class ApiController extends Controller {
 
             DB::beginTransaction();
             $user=Auth::user();
-            $userdb=User::find($user->id)->first();
             $item=Item::with('user:id,seller_uname','item_bid:id,user_id,bid_amount,bid_price,tipe,created_at','item_payment','category:id,name,image', 'gallery_images:id,image,item_id','item_payment')->where('id',$request->item_id)->first();
             if($item==null){
                 throw new \Exception("Item not found");
@@ -425,7 +424,7 @@ class ApiController extends Controller {
             if($item->bidstatus=='open'){
                 throw new \Exception("Bidding is still open");
             }
-            if($winner->id!==$userdb->id){
+            if($winner->id!==$user->id){
                 throw new \Exception("You are not the bid winner for this item");
             }
             if($request->amount!=$winner_bid->bid_price){
@@ -454,7 +453,6 @@ class ApiController extends Controller {
             $itemfile=file_get_contents($filepath);
             $item=json_decode($itemfile);
             $user = Auth::user();
-            $userdb = User::find($user->id)->first();
             $now=date("Y-m-d H:i:s");
             $bidtimelimitdt=new \DateTime($item->time_limit);
             $bidtimelimitdt->modify("-1 minute");
@@ -474,7 +472,8 @@ class ApiController extends Controller {
                 $updateItem['enddt']=$item->time_limit;
             }
             $item->last_price=$request->bid_price;
-            $item->bidder_uname=$userdb->buyer_uname;
+            $item->bidder_uname=$user->buyer_uname;
+            // var_dump($user);exit;
             $itembid=ItemBid::create([
                 'user_id'=>$user->id,
                 'item_id'=>$request->item_id,
@@ -514,7 +513,6 @@ class ApiController extends Controller {
             $itemfile=file_get_contents($filepath);
             $item=json_decode($itemfile);
             $user = Auth::user();
-            $userdb = User::find($user->id)->first();
             $now=date("Y-m-d H:i:s");
             $bidtimelimitdt=new \DateTime($item->time_limit);
             $bidtimelimitdt->modify("-1 minute");
@@ -546,7 +544,7 @@ class ApiController extends Controller {
             }
             $itemdb->save($updateItem);
             $item->status='closed';
-            $item->bidder_uname=$userdb->buyer_uname;
+            $item->bidder_uname=$user->buyer_uname;
             $file=fopen($filepath,"w");
             fwrite($file,json_encode($item));
             fclose($file);
