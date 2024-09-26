@@ -67,15 +67,22 @@ class ApiController extends Controller {
             $this->middleware('auth:sanctum');
         }
         $this->now=date("Y-m-d H:i:s");
+        
+        
+        
+    }
+    public function checkBlock(){
         if(Auth::check()){
             $user=Auth::user();
+            $user=User::where('id',$user->id)->first();
+            // var_dump($user);
             if($user->isblocked){
                 ResponseService::blockedResponse();
             }
         }
     }
-
     public function getSystemSettings(Request $request) {
+        $this->checkBlock();
         try {
             $settings = Setting::select(['name', 'value', 'type']);
 
@@ -176,6 +183,7 @@ class ApiController extends Controller {
     }
 
     public function updateProfile(Request $request) {
+        $this->checkBlock();
         try {
             $validator = Validator::make($request->all(), [
                 'name'    => 'nullable|string',
@@ -213,6 +221,7 @@ class ApiController extends Controller {
     }
 
     public function getPackage(Request $request) {
+        $this->checkBlock();
         $validator = Validator::make($request->toArray(), [
             'platform' => 'nullable|in:android,ios',
             'type'     => 'nullable|in:advertisement,item_listing'
@@ -304,6 +313,7 @@ class ApiController extends Controller {
         }
     }
     public function getBidcoinBalances(Request $request){
+        $this->checkBlock();
         $user = Auth::user();
         $balances=DB::table('bidcoin_balances')->where('user_id',$user->id)->orderBy('created_at')->get();
         $curr=0;
@@ -319,10 +329,12 @@ class ApiController extends Controller {
         ]);
     }
     public function getBidcoinPackages(Request $request){
+        $this->checkBlock();
         $packages=DB::table('bidcoin_packages')->where('status',1)->orderBy('id')->get();
         ResponseService::successResponse('Data Fetched Successfully', $packages);
     }
     public function purchaseBidcoin(Request $request){
+        $this->checkBlock();
         DB::beginTransaction();
         $user = Auth::user();
         $package=BidcoinPackage::where('id',$request->bidcoin_package_id)->first();
@@ -407,6 +419,7 @@ class ApiController extends Controller {
 
     }
     public function getItemDetail(Request $request){
+        $this->checkBlock();
         try{
             Item::closeItem($request->item_id);
             $item=Item::with('user:id,seller_uname,subdistrictid','item_bid:id,user_id,bid_amount,bid_price,tipe,created_at','item_payment','category:id,name,image', 'gallery_images:id,image,item_id')->where('id',$request->item_id)->first();
@@ -447,10 +460,12 @@ class ApiController extends Controller {
         }
     }
     public function getPgs(Request $request){
+        $this->checkBlock();
         $pgs=Pg::get();
         ResponseService::successResponse("PG List", $pgs);
     }
     public function payItem(Request $request){
+        $this->checkBlock();
         try {
             $validator = Validator::make($request->all(), [
                 'item_id' => 'required',
@@ -523,6 +538,7 @@ class ApiController extends Controller {
         }
     }
     public function bidItem(Request $request){
+        $this->checkBlock();
         try {
             DB::beginTransaction();
             $filepath=public_path('items/'.$request->item_id.'.json');
@@ -583,6 +599,7 @@ class ApiController extends Controller {
         }
     }
     public function buyNow(Request $request){
+        $this->checkBlock();
         try {
             DB::beginTransaction();
             $filepath=public_path('items/'.$request->item_id.'.json');
@@ -637,6 +654,7 @@ class ApiController extends Controller {
     }
     
     public function addItem(Request $request) {
+        $this->checkBlock();
         //bidprice, startbidprice, multiplebidprice, startbid, enddate
         try {
             $validator = Validator::make($request->all(), [
@@ -769,6 +787,7 @@ class ApiController extends Controller {
     }
 
     public function getItem(Request $request) {
+        $this->checkBlock();
         $validator = Validator::make($request->all(), [
             'limit'         => 'nullable|integer',
             'offset'        => 'nullable|integer',
@@ -933,6 +952,7 @@ class ApiController extends Controller {
     }
 
     public function updateItem(Request $request) {
+        $this->checkBlock();
         $validator = Validator::make($request->all(), [
             'id'                   => 'required',
             'name'                 => 'nullable',
@@ -1041,6 +1061,7 @@ class ApiController extends Controller {
     }
 
     public function deleteItem(Request $request) {
+        $this->checkBlock();
         try {
 
             $validator = Validator::make($request->all(), [
@@ -1067,6 +1088,7 @@ class ApiController extends Controller {
     }
 
     public function updateItemStatus(Request $request) {
+        $this->checkBlock();
         $validator = Validator::make($request->all(), [
             'item_id' => 'required|integer',
             'status'  => 'required|in:sold out,inactive,active'
@@ -1093,6 +1115,7 @@ class ApiController extends Controller {
     }
 
     public function getCategories(Request $request) {
+        $this->checkBlock();
         $validator = Validator::make($request->all(), [
             'category_id' => 'nullable|integer'
         ]);
@@ -1132,6 +1155,7 @@ class ApiController extends Controller {
     }
 
     public function getParentCategoryTree(Request $request) {
+        $this->checkBlock();
         $validator = Validator::make($request->all(), [
             'child_category_id'=>'required|integer',
             'tree'=>'nullable|boolean'
@@ -1152,6 +1176,7 @@ class ApiController extends Controller {
         }
     }
     public function getNotificationList() {
+        $this->checkBlock();
         try {
             $notifications = Notifications::whereRaw("FIND_IN_SET(" . Auth::user()->id . ",user_id)")->orWhere('send_to', 'all')->orderBy('id', 'DESC')->paginate();
             ResponseService::successResponse("Notification fetched successfully", $notifications);
@@ -2019,6 +2044,7 @@ class ApiController extends Controller {
         }
     }
     public function getBidHistory(Request $request) {
+        $this->checkBlock();
         try {
             $user = Auth::user();
             $sql = Item::selectRaw('items.*,max(ib.bid_price) as my_bid_price,winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_payment')
@@ -2066,6 +2092,7 @@ class ApiController extends Controller {
         }
     }
     public function getWaitingPayment(Request $request) {
+        $this->checkBlock();
         try {
             $user = Auth::user();
             $sql = Item::select('items.*','winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_payment')
@@ -2096,6 +2123,7 @@ class ApiController extends Controller {
         }
     }
     public function getSellHistory(Request $request) {
+        $this->checkBlock();
         try {
             $user = Auth::user();
             $sql = Item::select('items.*','winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_payment')
