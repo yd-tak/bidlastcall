@@ -36,6 +36,18 @@ class ItemPayment extends Model {
     public function pg(){
         return $this->belongsTo(Pg::class);
     }
+    public function getImgAttribute($img) {
+        if (!empty($img)) {
+            return url(Storage::url($img));
+        }
+        return $img;
+    }
+    public function getImgtransferAttribute($imgtransfer) {
+        if (!empty($img)) {
+            return url(Storage::url($imgtransfer));
+        }
+        return $img;
+    }
 
     
 }

@@ -126,6 +126,7 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
     Route::group(['prefix' => 'item'], static function () {
         Route::put('/{id}/approval', [ItemController::class, 'updateItemApproval'])->name('item.approval');
         Route::get('/sales', [ItemController::class, 'getSales'])->name('item.indexsales');
+        Route::post('/reviewPayment', [ItemController::class, 'reviewPayment'])->name('item.reviewpayment');
     });
     Route::resource('item', ItemController::class);
     /*** Item Module : END ***/

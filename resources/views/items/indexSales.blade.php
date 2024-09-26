@@ -82,10 +82,10 @@
                                             <td><?=number_format($row->closeprice)?></td>
                                             <td><?=($row->shippingservice==null)?'Belum pilih ongkir':number_format($row->shippingfee)?></td>
                                             <td><?=number_format($row->buyerbillprice)?></td>
-                                            <td><?=($row->item_payment==null)?'Buyer belum bayar':"<a href='javascript:viewpayment(".$row->item_payment->id.")'>".($row->item_payment->status=='review'?'Menunggu Review':'Lunas')."</a>"?></td>
+                                            <td><?=($row->item_payment==null)?'Buyer belum bayar':"<a href='javascript:viewpayment(".$row->item_payment->id.",'<?=$row->item_payment->img?>','<?=$row->item_payment->status')'>".($row->item_payment->status=='review'?'Menunggu Review':'Lunas')."</a>"?></td>
                                             <td><?=number_format($row->servicefee)?></td>
                                             <td><?=number_format($row->totalcloseprice)?></td>
-                                            <td><?=($row->item_payment==null)?'Buyer belum bayar':"<a href='javascript:viewpaymenttransfer(".$row->item_payment->id.")'>".($row->item_payment->status=='review'?'Menunggu Review':($row->item_payment->istransfered?'Belum Transfer':'Sudah Transfer'))."</a>"?></td>
+                                            <td><?=($row->item_payment==null)?'Buyer belum bayar':"<a href='javascript:viewpaymenttransfer(".$row->item_payment->id.",'<?=$row->item_payment->imgtransfer?>',<?=$row->item_payment->istransfered)'>".($row->item_payment->status=='review'?'Menunggu Review':($row->item_payment->istransfered?'Belum Transfer':'Sudah Transfer'))."</a>"?></td>
                                         <?php } ?>
                                     </tr>
                                 <?php } ?>
@@ -95,32 +95,30 @@
                 </div>
             </div>
         </div>
-        <div id="editStatusModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1"
+        <div id="viewPaymentModal" class="modal fade" tabindex="-1" role="dialog" 
              aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="myModalLabel1">{{ __('Status') }}</h5>
+                        <h5 class="modal-title" id="myModalLabel1">View/Review Payment <span id="payment-status"></span></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form class="edit-form" action="" method="POST" data-success-function="updateApprovalSuccess">
+                        <?php echo Form::open(array('route' => 'item.reviewpayment'));?>
                             @csrf
                             <div class="row">
                                 <div class="col-md-12">
                                     <select name="status" class="form-select" id="status" aria-label="status">
-                                        <option value="review">{{__("Under Review")}}</option>
-                                        <option value="approved">{{__("Approve")}}</option>
-                                        <option value="rejected">{{__("Reject")}}</option>
+                                        <option value="approved">Approve</option>
+                                        <option value="rejected">Reject</option>
                                     </select>
                                 </div>
                             </div>
-                            <div id="rejected_reason_container" class="col-md-12" style="display: none;">
-                                <label for="rejected_reason" class="mandatory form-label">Reason</label>
-                                <textarea name="rejected_reason" id="rejected_reason" class="form-control" placeholder="Reason"></textarea>
+                            <div class="col-md-12">
+                                <img src="#" id="view-payment-img" style="max-height: 400px;">
                             </div>
                             <input type="submit" value="Save" class="btn btn-primary mt-3">
-                        </form>
+                        <?php echo Form::close();?>
                     </div>
                 </div>
             </div>
@@ -130,8 +128,11 @@
 @endsection
 @section('js')
     <script>
-        function updateApprovalSuccess() {
-            $('#editStatusModal').modal('hide');
+        function viewpayment(id,img,status) {
+            $("#payment-status").html(status);
+            $("#view-payment-img").src("<?=Storage::url('')?>/"+img);
+            $('#viewpayment').modal('show');
+
         }
 
     </script>

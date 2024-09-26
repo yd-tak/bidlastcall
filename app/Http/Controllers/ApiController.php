@@ -484,9 +484,7 @@ class ApiController extends Controller {
             if($winner->id!==$user->id){
                 throw new \Exception("You are not the bid winner for this item");
             }
-            if($request->amount!=$winner_bid->bid_price){
-                throw new \Exception("You must pay what you bid for: Rp ".number_format($winner_bid->bid_price));
-            }
+            
             $img=null;
             if ($request->hasFile('uploadProof')) {
                 $img = FileService::compressAndUpload($request->file('uploadProof'), 'item_payments');
@@ -2136,14 +2134,9 @@ class ApiController extends Controller {
         $items=Item::where('enddt','<',$now)->get();
         // var_dump($items);
         foreach($items as $row){
-            if($row->bidstatus=='open'){
-                Item::closeItem($row->id);
-                echo "close1: ".$row->id."<br>";
-            }
-            elseif($row->bidstatus=='closed' && $row->closeprice==null && $row->winnerbidid!=null){
-                Item::closeItem($row->id);
-                echo "close2: ".$row->id."<br>";
-            }
+            Item::closeItem($row->id);
+            echo "close3: ".$row->id."<br>";
+            
         }
     }
 }
