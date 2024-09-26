@@ -502,10 +502,9 @@ class ApiController extends Controller {
             Item::where('id',$request->item_id)->update([
                 'shippingfee'=>$request->shippingfee,
                 'shippingetd'=>$request->shippingetd,
-                'shippingservice'=>$request->shippingservice,
-                'totalcloseprice'=>$item->closeprice+$request->shippingfee
+                'shippingservice'=>$request->shippingservice
             ]);
-
+            Item::closeItem($request->item_id);
             DB::commit();
 
             ResponseService::successResponse("Payment Success", $item_payment);
