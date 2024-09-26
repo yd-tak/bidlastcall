@@ -1953,6 +1953,7 @@ class ApiController extends Controller {
             ->groupBy('items.id')
             ->get();
             $bidHistories=[];
+            $ub_itemids=[];
             foreach($sql as $row){
                 if($row->my_bid_price==$row->winner_bid_price){
                     $row->iswinner=true;
@@ -1960,8 +1961,17 @@ class ApiController extends Controller {
                 else{
                     $row->iswinner=false;
                 }
+                $now=new \DateTime();
+                $enddt=new \DateTime($row->enddt);
+                if($enddt>$now && $row->bidstatus=='open'){
+                    $row->bidstatus='closed';
+                    $ub_itemids[]=$row->id;
+                }
                 $bidHistories[]=$row;
             }
+            Item::whereIn('id',$ub_itemids)->update([
+                'bidstatus'=>'closed'
+            ]);
             ResponseService::successResponse("Bid History Fetched", $bidHistories);
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);

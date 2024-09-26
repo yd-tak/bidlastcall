@@ -31,7 +31,10 @@ class User extends Authenticatable {
         'profile',
         'address',
         'notification',
-        'country_code'
+        'country_code',
+        'cityid',
+        'provinceid',
+        'subdistrictid'
     ];
 
     /**
