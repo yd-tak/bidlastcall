@@ -2060,7 +2060,7 @@ class ApiController extends Controller {
             ->leftJoin('item_payments as ipay','items.id','=','ipay.item_id')
             ->whereNull('ipay.id')
             ->where('winnerib.user_id',$user->id)
-            ->where('items.enddt < ',date("Y-m-d H:i:s"))
+            ->where('items.enddt','<',date("Y-m-d H:i:s"))
             ->orderBy('items.created_at','desc')
             ->get();
             $close_itemids=[];
