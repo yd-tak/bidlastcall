@@ -1434,57 +1434,44 @@ class ApiController extends Controller {
             $tempRow = array();
             $rows = array();
 
-            foreach ($featureSection as $row) {
-                $items = Item::where('status', 'approved')->take(5)->with('user:id,seller_uname,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->withCount('favourites')->has('user');
-                $items = match ($row->filter) {
-                    "price_criteria" => $items->whereBetween('price', [$row->min_price, $row->max_price]),
-                    "most_viewed" => $items->orderBy('clicks', 'DESC'),
-                    "category_criteria" => (static function() use($row,$items){
-                        $category = Category::whereIn('id', explode(',', $row->value))->with('children')->get();
-                        $categoryIDS = HelperService::findAllCategoryIds($category);
-                        return $items->whereIn('category_id', $categoryIDS)->orderBy('id', 'DESC');
-                    })(),
-                    "most_liked" => $items->orderBy('favourites_count', 'DESC'),
-                };
-
-                if (isset($request->city)) {
-                    $items = $items->where('city', $request->city);
-                }
-
-                if (isset($request->state)) {
-                    $items = $items->where('state', $request->state);
-                }
-
-                if (isset($request->country)) {
-                    $items = $items->where('country', $request->country);
-                }
-
-                if (isset($request->area_id)) {
-                    $items = $items->where('area_id', $request->area_id);
-                }
-
-                if (Auth::check()) {
-                    $items->with(['item_offers' => function ($q) {
-                        $q->where('buyer_id', Auth::user()->id);
-                    }, 'user_reports'           => function ($q) {
-                        $q->where('user_id', Auth::user()->id);
-                    }]);
-                }
-                $items = $items->get();
-//                $tempRow[$row->id]['section_id'] = $row->id;
-//                $tempRow[$row->id]['title'] = $row->title;
-//                $tempRow[$row->id]['style'] = $row->style;
-                $tempRow[$row->id] = $row;
-                $tempRow[$row->id]['total_data'] = count($items);
-                if (count($items) > 0) {
-                    $tempRow[$row->id]['section_data'] = new ItemCollection($items);
-                } else {
-                    $tempRow[$row->id]['section_data'] = [];
-                }
-
-                $rows[] = $tempRow[$row->id];
-            }
-            ResponseService::successResponse("Data Fetched Successfully", $rows);
+            $recentItems=Item::where('status','approved')->take(10)->with('user:id,seller_uname,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->withCount('favourites')->with('item_bid')->orderBy("startdt","desc")->get();
+            $now=date("Y-m-d H:i:s");
+            $openItems=Item::where('status','approved')->take(10)->with('user:id,seller_uname,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->withCount('favourites')->with('item_bid')->where('startdt','<=',$now)->where('enddt','>=',$now)->orderBy("startdt","asc")->get();
+            
+            ResponseService::successResponse("Data Fetched Successfully", [
+                [
+                    "id"=>1,
+                    "title"=>"New Items",
+                    "slug"=>"new-item",
+                    "sequence"=>1,
+                    "filter"=>"",
+                    "value"=>"",
+                    "style"=>"style_4",
+                    "min_price"=>null,
+                    "max_price"=>null,
+                    "created_at"=>"2024-05-08T12:20:35.000000Z",
+                    "updated_at"=>"2024-05-08T12:20:35.000000Z",
+                    "description"=>null,
+                    "total_data"=>count($recentItems),
+                    "section_data"=>$recentItems
+                ],
+                [
+                    "id"=>1,
+                    "title"=>"Bidding Now",
+                    "slug"=>"bidding-item",
+                    "sequence"=>2,
+                    "filter"=>"",
+                    "value"=>"",
+                    "style"=>"style_4",
+                    "min_price"=>null,
+                    "max_price"=>null,
+                    "created_at"=>"2024-05-08T12:20:35.000000Z",
+                    "updated_at"=>"2024-05-08T12:20:35.000000Z",
+                    "description"=>null,
+                    "total_data"=>count($openItems),
+                    "section_data"=>$openItems
+                ]
+            ]);
         } catch (Throwable $th) {
             ResponseService::logErrorResponse($th, "API Controller -> getFeaturedSection");
             ResponseService::errorResponse();
