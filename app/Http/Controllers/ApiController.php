@@ -639,6 +639,7 @@ class ApiController extends Controller {
             if(isset($updateItem['enddt'])){
                 $itemdb->enddt=$updateItem['enddt'];
             }
+            $updateItem['bidstatus']='closed';
 
             $itemdb->save($updateItem);
             $item->status='closed';
@@ -1377,9 +1378,10 @@ class ApiController extends Controller {
             $featureSection = $featureSection->get();
             $tempRow = array();
             $rows = array();
+            $now=date("Y-m-d H:i:s");
 
             $recentItems=Item::where('status','approved')->where('bidstatus','open')->take(10)->with('user:id,seller_uname,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->withCount('favourites')->with('item_bid')->where('startdt','<=',$now)->where('enddt','>=',$now)->orderBy("startdt","desc")->get();
-            $now=date("Y-m-d H:i:s");
+            // $now=date("Y-m-d H:i:s");
             $openItems=Item::where('status','approved')->where('bidstatus','open')->take(10)->with('user:id,seller_uname,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->withCount('favourites')->with('item_bid')->where('startdt','<=',$now)->where('enddt','>=',$now)->orderBy("startdt","asc")->get();
             
             ResponseService::successResponse("Data Fetched Successfully", [
