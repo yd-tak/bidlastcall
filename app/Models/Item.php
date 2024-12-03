@@ -99,12 +99,7 @@ class Item extends Model {
                 'paymentfailure'=>$failedPayments
             ];
             $netFailure=$failedPayments-$winneruser->paymentfailuretolerance;
-            if($netFailure>1){
-                $updateUser['isblocked']=0;
-            }
-            else{
-                $updateUser['isblocked']=0;
-            }
+            $updateUser['isblocked']=0;
             User::where('id',$winnerbid->user_id)->update($updateUser);
             
         }
