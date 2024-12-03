@@ -440,8 +440,8 @@ class ApiController extends Controller {
                 if($item->item_bid->tipe=='buy'){
                     $item->bidstatus='closed';
                 }
-                // $ongkirOpts=$this->getOngkir($item->user->subdistrictid,$winner->subdistrictid,$item->weight);
-                // $item->ongkirOpts=$ongkirOpts;
+                $ongkirOpts=$this->getOngkir($item->user->subdistrictid,$winner->subdistrictid,$item->weight);
+                $item->ongkirOpts=$ongkirOpts;
             
 
             }
