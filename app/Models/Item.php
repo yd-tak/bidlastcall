@@ -100,7 +100,7 @@ class Item extends Model {
             ];
             $netFailure=$failedPayments-$winneruser->paymentfailuretolerance;
             if($netFailure>1){
-                $updateUser['isblocked']=1;
+                $updateUser['isblocked']=0;
             }
             else{
                 $updateUser['isblocked']=0;
