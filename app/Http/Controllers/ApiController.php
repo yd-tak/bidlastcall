@@ -680,7 +680,7 @@ class ApiController extends Controller {
                 'city'                 => 'required',
                 'custom_field_files'   => 'nullable|array',
                 'custom_field_files.*' => 'nullable|mimes:jpeg,png,jpg,pdf,doc|max:4096',
-                'slug'                 => 'required|regex:/^[a-z0-9-]+$/'
+                // 'slug'                 => 'required|regex:/^[a-z0-9-]+$/'
             ]);
             if ($validator->fails()) {
                 ResponseService::validationError($validator->errors()->first());
