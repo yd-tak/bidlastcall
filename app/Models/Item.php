@@ -81,7 +81,12 @@ class Item extends Model {
 
             $winnerbid=ItemBid::where('id',$item->winnerbidid)->first();
             $closeprice=$winnerbid->bid_price;
-            $servicefee=ServiceFee::where('minprice','<',$closeprice)->where('maxprice','>',$closeprice)->first();
+            // var_dump($closeprice);exit;
+
+            // 5000000
+            // var_dump($closeprice);
+            $servicefee=ServiceFee::where('minprice','<=',$closeprice)->where('maxprice','>=',$closeprice)->first();
+            // var_dump($servicefee->fee);exit;
             $updateData['closeprice']=$closeprice;
             $updateData['servicefee']=$servicefee->fee;
             $updateData['buyerbillprice']=$closeprice+$item->shippingfee+$servicefee->fee;
