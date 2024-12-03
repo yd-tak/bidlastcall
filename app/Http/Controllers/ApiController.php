@@ -796,7 +796,6 @@ class ApiController extends Controller {
             'limit'         => 'nullable|integer',
             'offset'        => 'nullable|integer',
             'id'            => 'nullable',
-            'custom_fields' => 'nullable',
             'category_id'   => 'nullable',
             'user_id'       => 'nullable',
             'min_price'     => 'nullable',
@@ -809,134 +808,73 @@ class ApiController extends Controller {
             ResponseService::validationError($validator->errors()->first());
         }
         try {
+            $now=date("Y-m-d H:i:s");
+            // echo $now;
             $sql = Item::with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name')
-                ->withCount('favourites')
-                ->with('item_bid')
-                ->when($request->id, function ($sql) use ($request) {
-                    $sql->where('id', $request->id);
-                })->when(($request->category_id), function ($sql) use ($request) {
-                    $category = Category::where('id', $request->category_id)->with('children')->get();
-                    $categoryIDS = HelperService::findAllCategoryIds($category);
-                    return $sql->whereIn('category_id', $categoryIDS);
-                })->when(($request->category_slug), function ($sql) use ($request) {
-                    $category = Category::where('slug', $request->category_slug)->with('children')->get();
-                    $categoryIDS = HelperService::findAllCategoryIds($category);
-                    return $sql->whereIn('category_id', $categoryIDS);
-                })->when((isset($request->min_price) || isset($request->max_price)), function ($sql) use ($request) {
-                    $min_price = $request->min_price ?? 0;
-                    $max_price = $request->max_price ?? Item::max('price');
-                    return $sql->whereBetween('price', [$min_price, $max_price]);
-                })->when($request->posted_since, function ($sql) use ($request) {
-                    return match ($request->posted_since) {
-                        "today" => $sql->whereDate('created_at', '>=', now()),
-                        "within-1-week" => $sql->whereDate('created_at', '>=', now()->subDays(7)),
-                        "within-2-week" => $sql->whereDate('created_at', '>=', now()->subDays(14)),
-                        "within-1-month" => $sql->whereDate('created_at', '>=', now()->subMonths()),
-                        "within-3-month" => $sql->whereDate('created_at', '>=', now()->subMonths(3)),
-                        default => $sql
-                    };
-                })->when($request->country, function ($sql) use ($request) {
-                    return $sql->where('country', $request->country);
-                })->when($request->state, function ($sql) use ($request) {
-                    return $sql->where('state', $request->state);
-                })->when($request->city, function ($sql) use ($request) {
-                    return $sql->where('city', $request->city);
-                })->when($request->area_id, function ($sql) use ($request) {
-                    return $sql->where('area_id', $request->area_id);
-                })->when($request->slug, function ($sql) use ($request) {
-                    return $sql->where('slug', $request->slug);
-                });
-
-            // Sort By
-            if ($request->sort_by == "new-to-old") {
-                $sql->orderBy('id', 'DESC');
-            } elseif ($request->sort_by == "old-to-new") {
-                $sql->orderBy('id', 'ASC');
-            } elseif ($request->sort_by == "price-high-to-low") {
-                $sql->orderBy('price', 'DESC');
-            } elseif ($request->sort_by == "price-low-to-high") {
-                $sql->orderBy('price', 'ASC');
-            } elseif ($request->sort_by == "popular_items") {
-                $sql->orderBy('clicks', 'DESC');
-            } else {
-                $sql->orderBy('id', 'DESC');
-            }
-
-            // Status
-            if (!empty($request->status)) {
-                if (in_array($request->status, array('review', 'approved', 'rejected', 'sold out'))) {
-                    $sql->where('status', $request->status);
-                } elseif ($request->status == 'inactive') {
-                    //If status is inactive then display only trashed items
-                    $sql->onlyTrashed();
-                } elseif ($request->status == 'featured') {
-                    //If status is featured then display only featured items
-                    $sql->where('status','approved')->has('featured_items');
+                        ->withCount('favourites')
+                        ->with('item_bid');
+            if (!empty($request->featured_section_id)) {
+                if($request->featured_section_id==='1'){
+                    $sql->where("bidstatus","open")->orderBy('startdt','desc');
+                }
+                elseif($request->featured_section_id==='2'){
+                    $sql->where("bidstatus","open")->where('startdt','<=',$now)->where('enddt','>=',$now)->orderBy('startdt','desc');
                 }
             }
-
-            // Feature Section Filtration
-            if (!empty($request->featured_section_id) || !empty($request->featured_section_slug)) {
-                if (!empty($request->featured_section_id)) {
-                    $featuredSection = FeatureSection::findOrFail($request->featured_section_id);
-                } else {
-                    $featuredSection = FeatureSection::where('slug', $request->featured_section_slug)->firstOrFail();
-                }
-                $sql = match ($featuredSection->filter) {
-                    /*Note : Reorder function is used to clear out the previously applied order by statement*/
-                    "price_criteria" => $sql->whereBetween('price', [$featuredSection->min_price, $featuredSection->max_price]),
-                    "most_viewed" => $sql->reorder()->orderBy('clicks', 'DESC'),
-                    "category_criteria" => (static function() use($featuredSection,$sql){
-                        $category = Category::whereIn('id', explode(',', $featuredSection->value))->with('children')->get();
+            else{
+                $sql->when($request->id, function ($sql) use ($request) {
+                        $sql->where('id', $request->id);
+                    })->when(($request->category_id), function ($sql) use ($request) {
+                        $category = Category::where('id', $request->category_id)->with('children')->get();
                         $categoryIDS = HelperService::findAllCategoryIds($category);
                         return $sql->whereIn('category_id', $categoryIDS);
-                    })(),
-                    "most_liked" => $sql->reorder()->orderBy('favourites_count', 'DESC'),
-                };
-            }
+                    })->when((isset($request->min_price) || isset($request->max_price)), function ($sql) use ($request) {
+                        $min_price = $request->min_price ?? 0;
+                        $max_price = $request->max_price ?? Item::max('price');
+                        return $sql->whereBetween('price', [$min_price, $max_price]);
+                    })->when($request->posted_since, function ($sql) use ($request) {
+                        return match ($request->posted_since) {
+                            "today" => $sql->whereDate('created_at', '>=', now()),
+                            "within-1-week" => $sql->whereDate('created_at', '>=', now()->subDays(7)),
+                            "within-2-week" => $sql->whereDate('created_at', '>=', now()->subDays(14)),
+                            "within-1-month" => $sql->whereDate('created_at', '>=', now()->subMonths()),
+                            "within-3-month" => $sql->whereDate('created_at', '>=', now()->subMonths(3)),
+                            default => $sql
+                        };
+                    })->when($request->country, function ($sql) use ($request) {
+                        return $sql->where('country', $request->country);
+                    })->when($request->state, function ($sql) use ($request) {
+                        return $sql->where('state', $request->state);
+                    })->when($request->city, function ($sql) use ($request) {
+                        return $sql->where('city', $request->city);
+                    })->when($request->area_id, function ($sql) use ($request) {
+                        return $sql->where('area_id', $request->area_id);
+                    })->when($request->slug, function ($sql) use ($request) {
+                        return $sql->where('slug', $request->slug);
+                    });
 
+                // Sort By
+                if ($request->sort_by == "new-to-old") {
+                    $sql->orderBy('id', 'DESC');
+                } elseif ($request->sort_by == "old-to-new") {
+                    $sql->orderBy('id', 'ASC');
+                } elseif ($request->sort_by == "price-high-to-low") {
+                    $sql->orderBy('price', 'DESC');
+                } elseif ($request->sort_by == "price-low-to-high") {
+                    $sql->orderBy('price', 'ASC');
+                } elseif ($request->sort_by == "popular_items") {
+                    $sql->orderBy('clicks', 'DESC');
+                } else {
+                    $sql->orderBy('id', 'DESC');
+                }
+            }
 
             if (!empty($request->search)) {
                 $sql->search($request->search);
             }
 
-            if (!empty($request->custom_fields)) {
-                $sql->whereHas('item_custom_field_values', function ($q) use ($request) {
-                    $having = '';
-                    foreach ($request->custom_fields as $id => $value) {
-                        foreach (explode(",", $value) as $column_value) {
-                            $having .= "WHEN custom_field_id = $id AND value LIKE \"%$column_value%\" THEN custom_field_id ";
-                        }
-                    }
-                    $q->where(function ($q) use ($request) {
-                        foreach ($request->custom_fields as $id => $value) {
-                            $q->orWhere(function ($q) use ($id, $value) {
-                                foreach (explode(",", $value) as $value) {
-                                    $q->where('custom_field_id', $id)->where('value', 'LIKE', "%" . $value . "%");
-                                }
-                            });
-                        }
-                    })->groupBy('item_id')->having(DB::raw("COUNT(DISTINCT CASE $having END)"), '=', count($request->custom_fields));
-                });
-            }
-            if (Auth::check()) {
-                $sql->with(['item_offers' => function ($q) {
-                    $q->where('buyer_id', Auth::user()->id);
-                }, 'user_reports'         => function ($q) {
-                    $q->where('user_id', Auth::user()->id);
-                }]);
+            $sql->where('status', 'approved');
 
-                $currentURI = explode('?', $request->getRequestUri(), 2);
-
-                if ($currentURI[0] == "/api/my-items") { //TODO: This if condition is temporary fix. Need something better
-                    $sql->where(['user_id' => Auth::user()->id])->withTrashed();
-                } else {
-                    $sql->where('status', 'approved')->has('user')->onlyNonBlockedUsers();
-                }
-            } else {
-                //  Other users should only get approved items
-                $sql->where('status', 'approved');
-            }
             if (!empty($request->id)) {
                 $result = $sql->get();
                 if (count($result) == 0) {
@@ -1438,9 +1376,9 @@ class ApiController extends Controller {
             $tempRow = array();
             $rows = array();
 
-            $recentItems=Item::where('status','approved')->take(10)->with('user:id,seller_uname,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->withCount('favourites')->with('item_bid')->orderBy("startdt","desc")->get();
+            $recentItems=Item::where('status','approved')->where('bidstatus','open')->take(10)->with('user:id,seller_uname,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->withCount('favourites')->with('item_bid')->orderBy("startdt","desc")->get();
             $now=date("Y-m-d H:i:s");
-            $openItems=Item::where('status','approved')->take(10)->with('user:id,seller_uname,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->withCount('favourites')->with('item_bid')->where('startdt','<=',$now)->where('enddt','>=',$now)->orderBy("startdt","asc")->get();
+            $openItems=Item::where('status','approved')->where('bidstatus','open')->take(10)->with('user:id,seller_uname,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->withCount('favourites')->with('item_bid')->where('startdt','<=',$now)->where('enddt','>=',$now)->orderBy("startdt","asc")->get();
             
             ResponseService::successResponse("Data Fetched Successfully", [
                 [
@@ -1460,7 +1398,7 @@ class ApiController extends Controller {
                     "section_data"=>$recentItems
                 ],
                 [
-                    "id"=>1,
+                    "id"=>2,
                     "title"=>"Bidding Now",
                     "slug"=>"bidding-item",
                     "sequence"=>2,
