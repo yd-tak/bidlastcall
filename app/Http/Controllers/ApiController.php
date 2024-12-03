@@ -817,10 +817,10 @@ class ApiController extends Controller {
                         ->with('item_bid');
             if (!empty($request->featured_section_id)) {
                 if($request->featured_section_id==='1'){
-                    $sql->where("bidstatus","open")->orderBy('startdt','desc');
+                    $sql->where("bidstatus","open")->where('startdt','<=',$now)->where('enddt','>=',$now)->orderBy('startdt','desc');
                 }
                 elseif($request->featured_section_id==='2'){
-                    $sql->where("bidstatus","open")->where('startdt','<=',$now)->where('enddt','>=',$now)->orderBy('startdt','desc');
+                    $sql->where("bidstatus","open")->where('startdt','<=',$now)->where('enddt','>=',$now)->orderBy('startdt','asc');
                 }
             }
             else{
@@ -1378,7 +1378,7 @@ class ApiController extends Controller {
             $tempRow = array();
             $rows = array();
 
-            $recentItems=Item::where('status','approved')->where('bidstatus','open')->take(10)->with('user:id,seller_uname,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->withCount('favourites')->with('item_bid')->orderBy("startdt","desc")->get();
+            $recentItems=Item::where('status','approved')->where('bidstatus','open')->take(10)->with('user:id,seller_uname,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->withCount('favourites')->with('item_bid')->where('startdt','<=',$now)->where('enddt','>=',$now)->orderBy("startdt","desc")->get();
             $now=date("Y-m-d H:i:s");
             $openItems=Item::where('status','approved')->where('bidstatus','open')->take(10)->with('user:id,seller_uname,name,email,mobile,profile', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field')->withCount('favourites')->with('item_bid')->where('startdt','<=',$now)->where('enddt','>=',$now)->orderBy("startdt","asc")->get();
             
