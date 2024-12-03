@@ -635,6 +635,7 @@ class ApiController extends Controller {
             if(isset($updateItem['enddt'])){
                 $itemdb->enddt=$updateItem['enddt'];
             }
+
             $itemdb->save($updateItem);
             $item->status='closed';
             $item->bidder_uname=$user->buyer_uname;
@@ -642,6 +643,7 @@ class ApiController extends Controller {
             fwrite($file,json_encode($item));
             fclose($file);
             
+            Item::closeItem($request->item_id);
             DB::commit();
 
             ResponseService::successResponse("Bid Success", $item);
