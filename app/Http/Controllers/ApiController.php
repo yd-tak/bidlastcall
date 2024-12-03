@@ -430,6 +430,7 @@ class ApiController extends Controller {
             }
 
             // $item->bidstatus='open';
+
             $currbidstatus=$item->bidstatus;
             if($item->item_bid!=null){
                 $winner=User::where('id',$item->item_bid->user_id)->first();
@@ -438,11 +439,12 @@ class ApiController extends Controller {
                 if($item->item_bid->tipe=='buy'){
                     $item->bidstatus='closed';
                 }
-                $ongkirOpts=$this->getOngkir($item->user->subdistrictid,$winner->subdistrictid,$item->weight);
-                $item->ongkirOpts=$ongkirOpts;
+                // $ongkirOpts=$this->getOngkir($item->user->subdistrictid,$winner->subdistrictid,$item->weight);
+                // $item->ongkirOpts=$ongkirOpts;
             
 
             }
+            // echo "A";exit;
             if($item->bidstatus=='open' && $item->enddt<$this->now){
                 $item->bidstatus='closed';
             }
@@ -515,7 +517,7 @@ class ApiController extends Controller {
             if ($request->hasFile('uploadProof')) {
                 $img = FileService::compressAndUpload($request->file('uploadProof'), 'item_payments');
             }
-            $totalamount=$request->amount+$request->shippingfee;
+            $totalcloseprice=$request->amount+$request->shippingfee;
             $data = [
                 ...$request->all(),
                 'item_bid_id'=>$winner_bid->id,
@@ -527,7 +529,7 @@ class ApiController extends Controller {
                 'shippingfee'=>$request->shippingfee,
                 'shippingetd'=>$request->shippingetd,
                 'shippingservice'=>$request->shippingservice,
-                'totalamount'=>$totalamount
+                'totalcloseprice'=>$totalcloseprice
             ]);
             Item::closeItem($request->item_id);
             DB::commit();
