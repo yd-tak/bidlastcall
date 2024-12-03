@@ -693,7 +693,7 @@ class ApiController extends Controller {
             $data = [
                 ...$request->all(),
                 'name'       => $request->name, // Store name in uppercase
-                'slug'       => HelperService::generateUniqueSlug(new Item(), $request->input('slug')),
+                // 'slug'       => HelperService::generateUniqueSlug(new Item(), $request->input('slug')),
                 'status'     => "review", //review,approve,reject
                 'active'     => "deactive", //active/deactive
                 'user_id'    => $user->id,
