@@ -2071,7 +2071,7 @@ class ApiController extends Controller {
                 ]);
             }
             $bidHistories=Item::parseStatus($bidHistories);
-            $returns=['all'=>[],'open-bid'=>[],'win'=>[],'lose'=>[],'waiting-payment'=>[],'review-payment'=>[],'waiting-delivery'=>[],'on-delivery'=>[],'transfer-seller'=>[],'completed'=>[],'trouble-delivery'=>[],'not-sold'];
+            $returns=['all'=>[],'open-bid'=>[],'win'=>[],'lose'=>[],'waiting-payment'=>[],'review-payment'=>[],'waiting-delivery'=>[],'on-delivery'=>[],'transfer-seller'=>[],'completed'=>[],'trouble-delivery'=>[],'not-sold'=>[]];
             foreach($bidHistories as $row){
                 $returns['all'][]=$row;
                 $returns[$row->statusparse][]=$row;
@@ -2132,7 +2132,7 @@ class ApiController extends Controller {
             $open=[];
             $closed=[];
             $now=new \DateTime();
-            $returns=['all'=>[],'open-bid'=>[],'waiting-payment'=>[],'review-payment'=>[],'waiting-delivery'=>[],'on-delivery'=>[],'transfer-seller'=>[],'completed'=>[],'trouble-delivery'=>[],'not-sold'];
+            $returns=['all'=>[],'open-bid'=>[],'waiting-payment'=>[],'review-payment'=>[],'waiting-delivery'=>[],'on-delivery'=>[],'transfer-seller'=>[],'completed'=>[],'trouble-delivery'=>[],'not-sold'=>[]];
             $sql=Item::parseStatus($sql);
             foreach($sql as $row){
                 $haswinner=false;
