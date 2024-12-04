@@ -52,13 +52,13 @@
                                 <th>Seller</th>
                                 <th>Open Bid</th>
                                 <th data-field="status" data-sortable="true" data-filter-control="select" data-filter-data="" data-escape="false" >Status</th>
-                                <th>Current Bid</th>
+                                <th>Last Bid</th>
                                 <th>Winner</th>
                                 <th>Close Price</th>
                                 <th>Shipping</th>
+                                <th>Service</th>
                                 <th>Buyer Net</th>
                                 <th>Buyer Payment</th>
-                                <th>Service</th>
                                 <th>Seller Net</th>
                                 <th>Seller Transfer</th>
                             </thead>
@@ -83,12 +83,12 @@
                                             <td><?=number_format($row->item_bid->bid_price)?></td>
                                             <td><?=$row->buyer_uname?></td>
                                             <td><?=number_format($row->closeprice)?></td>
-                                            <td><?=($row->shippingservice==null)?'Belum pilih ongkir':number_format($row->shippingfee)?></td>
-                                            <td><?=number_format($row->buyerbillprice)?></td>
-                                            <td><?=($row->item_payment==null)?'Buyer belum bayar':"<a href=\"javascript:viewpayment(".$row->item_payment->id.",'".$row->item_payment->img."','".$row->item_payment->status."')\">".($row->item_payment->status=='review'?'Menunggu Review':'Lunas')."</a>"?></td>
+                                            <td><?=($row->shippingservice==null)?'Belum Pilih Ongkir':number_format($row->shippingfee)?></td>
                                             <td><?=number_format($row->servicefee)?></td>
+                                            <td><?=number_format($row->buyerbillprice)?></td>
+                                            <td><?=($row->item_payment==null)?'Belum Bayar':"<a href=\"javascript:viewpayment(".$row->item_payment->id.",'".$row->item_payment->img."','".$row->item_payment->status."')\">".($row->item_payment->status=='review'?'Menunggu Review':'Lunas')."</a>"?></td>
                                             <td><?=number_format($row->totalcloseprice)?></td>
-                                            <td><?=($row->item_payment==null)?'Buyer belum bayar':($row->item_payment->status=='review'?'Review Pembayaran Dulu':"<a href=\"javascript:viewpaymenttransfer(".$row->item_payment->id.",'".$row->item_payment->imgtransfer."',".$row->item_payment->istransfered.")\">".($row->item_payment->istransfered?'Sudah Transfer':'Belum Transfer'))."</a>"?></td>
+                                            <td><?=($row->item_payment==null)?'Belum Bayar':($row->item_payment->status=='review'?'Review Pembayaran Dulu':"<a href=\"javascript:viewpaymenttransfer(".$row->item_payment->id.",'".$row->item_payment->imgtransfer."',".$row->item_payment->istransfered.")\">".($row->item_payment->istransfered?'Sudah Transfer':'Belum Transfer'))."</a>"?></td>
                                         <?php } ?>
                                     </tr>
                                 <?php } ?>

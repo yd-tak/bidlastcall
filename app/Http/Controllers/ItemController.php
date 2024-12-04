@@ -22,7 +22,7 @@ class ItemController extends Controller {
         return view('items.index');
     }
     public function getSales(Request $request){
-        $items=Item::with('user:id,seller_uname','item_bid:id,user_id,bid_price','item_payment')->select('items.*','buyer.buyer_uname')->leftJoin('item_bids as ib','items.winnerbidid','=','ib.id')->leftJoin('users as buyer','ib.user_id','=','buyer.id')->get();
+        $items=Item::with('user:id,seller_uname','item_bid:id,user_id,bid_price','item_payment')->select('items.*','buyer.buyer_uname')->leftJoin('item_bids as ib','items.winnerbidid','=','ib.id')->leftJoin('users as buyer','ib.user_id','=','buyer.id')->whereNotNull('items.winnerbidid')->get();
         
         
         // exit;

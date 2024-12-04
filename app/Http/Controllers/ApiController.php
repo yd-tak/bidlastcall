@@ -497,6 +497,33 @@ class ApiController extends Controller {
             ResponseService::errorResponse($e->getMessage());
         }
     }
+    public function receiveItem(Request $request){
+        $this->checkBlock();
+        try {
+            $validator = Validator::make($request->all(), [
+                'item_id' => 'required',
+                'receive_at' => 'required',
+                'is_receive_ok' => 'required'
+            ]);
+            if ($validator->fails()) {
+                ResponseService::validationError($validator->errors()->first());
+            }
+
+            DB::beginTransaction();
+            
+            Item::where('id',$request->item_id)->update([
+                'receive_at'=>$request->receive_at,
+                'is_receive_ok'=>$request->is_receive_ok
+            ]);
+            DB::commit();
+
+            ResponseService::successResponse("Penerimaan barang berhasil", 1);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            ResponseService::errorResponse($e->getMessage());
+        }
+    }
     public function payItem(Request $request){
         $this->checkBlock();
         try {
