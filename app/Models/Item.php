@@ -50,7 +50,8 @@ class Item extends Model {
         'expire_payment_at',
         'noresi',
         'send_at',
-        'receive_at'
+        'receive_at',
+        'is_receive_ok'
     ];
 
     // Relationships
