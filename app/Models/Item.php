@@ -114,56 +114,60 @@ class Item extends Model {
         }
 
     }
-    public static function parseStatus($items){
-        foreach($items as $row){
-            $row->statusparse='';
-            $row->statusparsestr='';
-            if($row->bidstatus=='open'){
-                $row->statusparse='open-bid';
-                $row->statusparsestr='Open Bid';
-            }
-            elseif($row->bidstatus=='closed'){
-                if($row->winnerbidid!=null){
-                    if($row->item_payment==null){
-                        $row->statusparse='waiting-payment';
-                        $row->statusparsestr='Menunggu Pembayaran';
+    public static function parseStatusSingle($row){
+        $row->statusparse='';
+        $row->statusparsestr='';
+        if($row->bidstatus=='open'){
+            $row->statusparse='open-bid';
+            $row->statusparsestr='Open Bid';
+        }
+        elseif($row->bidstatus=='closed'){
+            if($row->winnerbidid!=null){
+                if($row->item_payment==null){
+                    $row->statusparse='waiting-payment';
+                    $row->statusparsestr='Menunggu Pembayaran';
+                }
+                elseif($row->item_payment->status=='review'){
+                    $row->statusparse='review-payment';
+                    $row->statusparsestr='Review Pembayaran';
+                }
+                elseif($row->item_payment->status=='approve'){
+                    if($row->noresi==null){
+                        $row->statusparse="waiting-delivery";
+                        $row->statusparsestr="Menunggu Pengiriman";
                     }
-                    elseif($row->item_payment->status=='review'){
-                        $row->statusparse='review-payment';
-                        $row->statusparsestr='Review Pembayaran';
-                    }
-                    elseif($row->item_payment->status=='approve'){
-                        if($row->noresi==null){
-                            $row->statusparse="waiting-delivery";
-                            $row->statusparsestr="Menunggu Pengiriman";
+                    else{
+                        if($row->receive_at==null){
+                            $row->statusparse="on-delivery";
+                            $row->statusparsestr="Dalam Pengiriman";
                         }
-                        else{
-                            if($row->receive_at==null){
-                                $row->statusparse="on-delivery";
-                                $row->statusparsestr="Dalam Pengiriman";
-                            }
-                            elseif($row->is_receive_ok){
-                                if(!$row->item_payment->istransfered){
-                                    $row->statusparse='transfer-seller';
-                                    $row->statusparsestr='Selesai';
-                                }
-                                else{
-                                    $row->statusparse='completed';
-                                    $row->statusparsestr='Completed';
-                                }
+                        elseif($row->is_receive_ok){
+                            if(!$row->item_payment->istransfered){
+                                $row->statusparse='transfer-seller';
+                                $row->statusparsestr='Selesai';
                             }
                             else{
-                                $row->statusparse='trouble-delivery';
-                                $row->statusparsestr='Pengiriman Bermasalah';
+                                $row->statusparse='completed';
+                                $row->statusparsestr='Completed';
                             }
+                        }
+                        else{
+                            $row->statusparse='trouble-delivery';
+                            $row->statusparsestr='Pengiriman Bermasalah';
                         }
                     }
                 }
-                else{
-                    $row->statusparse='not-sold';
-                    $row->statusparsestr='Tidak Terjual';
-                }
             }
+            else{
+                $row->statusparse='not-sold';
+                $row->statusparsestr='Tidak Terjual';
+            }
+        }
+        return $row;
+    }
+    public static function parseStatus($items){
+        foreach($items as $row){
+            $row=Item::parseStatusSingle($row);
         }
         return $items;
     }

@@ -457,6 +457,7 @@ class ApiController extends Controller {
             $itembids=ItemBid::with('user:id,buyer_uname')->where('item_id',$request->item_id)->get();
             // exit;
             $item->bids=$itembids;
+            $item=Item::parseStatusSingle($item);
             // var_dump($item);
             ResponseService::successResponse("Item Detail", $item);
         } catch (\Exception $e) {
@@ -2097,7 +2098,8 @@ class ApiController extends Controller {
             $open=[];
             $closed=[];
             $now=new \DateTime();
-
+            $returns=['all'=>[],'open-bid'=>[],'waiting-payment'=>[],'review-payment'=>[],'waiting-delivery'=>[],'on-delivery'=>[],'transfer-seller'=>[],'completed'=>[],'finished'=>[],'trouble-delivery'=>[],'not-sold'];
+            $sql=Item::parseStatus($sql);
             foreach($sql as $row){
                 $haswinner=false;
                 $hasclosed=false;
@@ -2111,20 +2113,11 @@ class ApiController extends Controller {
                 $row->haswinner=$haswinner;
                 $row->hasclosed=$hasclosed;
                 
-                $all[]=$row;
-                if($hasclosed){
-                    $closed[]=$row;
-                }
-                else{
-                    $open[]=$row;
-                }
+                $returns['all'][]=$row;
+                $returns[$row->statusparse][]=$row;
             }
-            $all=Item::parseStatus($all);
-            ResponseService::successResponse("Sell History Fetched", [
-                'all'=>$all,
-                'open'=>$open,
-                'closed'=>$closed
-            ]);
+            
+            ResponseService::successResponse("Sell History Fetched", $returns);
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);
             ResponseService::errorResponse();
