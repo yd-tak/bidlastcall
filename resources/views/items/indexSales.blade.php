@@ -54,11 +54,16 @@
                                 <th data-field="status" data-sortable="true" data-filter-control="select" data-filter-data="" data-escape="false" >Status</th>
                                 <th>Last Bid</th>
                                 <th>Winner</th>
-                                <th>Close Price</th>
-                                <th>Shipping</th>
-                                <th>Service</th>
+                                <!-- <th>Close Price</th> -->
+                                <!-- <th>Shipping</th> -->
+                                <!-- <th>Service</th> -->
                                 <th>Buyer Net</th>
                                 <th>Buyer Payment</th>
+                                <th>Tgl Kirim</th>
+                                <th>No Resi</th>
+
+                                <th>Diterima Buyer?</th>
+                                <th>Diterima Tgl</th>
                                 <th>Seller Net</th>
                                 <th>Seller Transfer</th>
                             </thead>
@@ -82,13 +87,29 @@
                                         <?php } else{?>
                                             <td><?=number_format($row->item_bid->bid_price)?></td>
                                             <td><?=$row->buyer_uname?></td>
-                                            <td><?=number_format($row->closeprice)?></td>
-                                            <td><?=($row->shippingservice==null)?'Belum Pilih Ongkir':number_format($row->shippingfee)?></td>
-                                            <td><?=number_format($row->servicefee)?></td>
+                                            <!-- <td><?=number_format($row->closeprice)?></td> -->
+                                            <!-- <td><?=($row->shippingservice==null)?'Belum Pilih Ongkir':number_format($row->shippingfee). '<br>('.$row->shippingservice.')'?></td> -->
+                                            <!-- <td><?=number_format($row->servicefee)?></td> -->
                                             <td><?=number_format($row->buyerbillprice)?></td>
-                                            <td><?=($row->item_payment==null)?'Belum Bayar':"<a href=\"javascript:viewpayment(".$row->item_payment->id.",'".$row->item_payment->img."','".$row->item_payment->status."')\">".($row->item_payment->status=='review'?'Menunggu Review':'Lunas')."</a>"?></td>
+                                            <td><?=($row->item_payment==null)?'Belum Bayar':"<a href=\"javascript:viewpayment(".$row->item_payment->id.",'".$row->item_payment->img."','".$row->item_payment->status."')\">".($row->item_payment->status=='review'?'Review Pembayaran':'Lunas')."</a>"?></td>
+                                            <td><?=substr($row->send_at,0,10)?></td>
+                                            <td><?=$row->noresi==null?'Belum Kirim':$row->noresi?></td>
+                                            <td><?=$row->is_receive_ok==null?'Belum Diterima':($row->is_receive_ok?'Y':'Bermasalah')?></td>
+                                            <td><?=$row->receive_at?></td>
                                             <td><?=number_format($row->totalcloseprice)?></td>
-                                            <td><?=($row->item_payment==null)?'Belum Bayar':($row->item_payment->status=='review'?'Review Pembayaran Dulu':"<a href=\"javascript:viewpaymenttransfer(".$row->item_payment->id.",'".$row->item_payment->imgtransfer."',".$row->item_payment->istransfered.")\">".($row->item_payment->istransfered?'Sudah Transfer':'Belum Transfer'))."</a>"?></td>
+
+                                            <td><?php
+                                            switch($row->statusparse){
+                                                case "waiting-payment":echo "Belum Bayar";break;
+                                                case "review-payment":echo "Review Pembayaran";break;
+                                                case "waiting-delivery":echo "Belum Kirim";break;
+                                                case "on-delivery":echo "Belum Diterima";break;
+                                                case "trouble-delivery":echo "Pengiriman Bermasalah";break;
+                                                case "transfer-seller":
+                                                case "commpleted":echo "<a href=\"javascript:viewpaymenttransfer(".$row->item_payment->id.",'".$row->item_payment->imgtransfer."',".$row->item_payment->istransfered.")\">".($row->item_payment->istransfered?'Sudah Transfer':'Belum Transfer')."</a>";break;
+
+                                            }
+                                            ?></td>
                                         <?php } ?>
                                     </tr>
                                 <?php } ?>

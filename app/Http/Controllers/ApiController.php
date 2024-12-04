@@ -2138,8 +2138,16 @@ class ApiController extends Controller {
                 $haswinner=false;
                 $hasclosed=false;
                 $enddt=new \DateTime($row->enddt);
-                if($enddt<$now){
+                if($row->bidstatus=='open' && $enddt>$now){
+                    $hasclosed=false;
+                }
+                elseif($row->bidstatus=='closed'){
                     $hasclosed=true;
+                }
+                elseif($row->bidstatus=='open' && $enddt<$now){
+                    $hasclosed=true;
+                }
+                if($hasclosed){
                     if($row->winner_bid_price!=null){
                         $haswinner=true;
                     }
