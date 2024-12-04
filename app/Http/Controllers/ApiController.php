@@ -2031,10 +2031,6 @@ class ApiController extends Controller {
                     $row->bidstatus='closed';
                     $close_itemids[]=$row->id;
                 }
-                // elseif($enddt>$now && $row->bidstatus=='closed'){
-                //     $row->bidstatus='open';
-                //     $open_itemids[]=$row->id;
-                // }
                 $bidHistories[]=$row;
             }
             if(!empty($open_itemids)){
@@ -2048,7 +2044,18 @@ class ApiController extends Controller {
                 ]);
             }
             $bidHistories=Item::parseStatus($bidHistories);
-            ResponseService::successResponse("Bid History Fetched", $bidHistories);
+            $returns=['all'=>[],'open-bid'=>[],'win'=>[],'lose'=>[],'waiting-payment'=>[],'review-payment'=>[],'waiting-delivery'=>[],'on-delivery'=>[],'transfer-seller'=>[],'completed'=>[],'trouble-delivery'=>[],'not-sold'];
+            foreach($bidHistories as $row){
+                $returns['all'][]=$row;
+                $returns[$row->statusparse][]=$row;
+                if($row->iswinner && $row->bidstatus=='closed'){
+                    $returns['win'][]=$row;
+                }
+                elseif($row->bidstatus=='closed'){
+                    $returns['lose'][]=$row;
+                }
+            }
+            ResponseService::successResponse("Bid History Fetched", $returns);
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);
             ResponseService::errorResponse();
@@ -2098,7 +2105,7 @@ class ApiController extends Controller {
             $open=[];
             $closed=[];
             $now=new \DateTime();
-            $returns=['all'=>[],'open-bid'=>[],'waiting-payment'=>[],'review-payment'=>[],'waiting-delivery'=>[],'on-delivery'=>[],'transfer-seller'=>[],'completed'=>[],'finished'=>[],'trouble-delivery'=>[],'not-sold'];
+            $returns=['all'=>[],'open-bid'=>[],'waiting-payment'=>[],'review-payment'=>[],'waiting-delivery'=>[],'on-delivery'=>[],'transfer-seller'=>[],'completed'=>[],'trouble-delivery'=>[],'not-sold'];
             $sql=Item::parseStatus($sql);
             foreach($sql as $row){
                 $haswinner=false;
