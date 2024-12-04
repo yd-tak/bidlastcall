@@ -47,7 +47,10 @@ class Item extends Model {
         'shippingfee',
         'closeprice',
         'totalcloseprice',
-        'expire_payment_at'
+        'expire_payment_at',
+        'noresi',
+        'send_at',
+        'receive_at'
     ];
 
     // Relationships
@@ -129,13 +132,29 @@ class Item extends Model {
                         $row->statusparsestr='Review Pembayaran';
                     }
                     elseif($row->item_payment->status=='approve'){
-                        if(!$row->item_payment->istransfered){
-                            $row->statusparse='transfer-seller';
-                            $row->statusparsestr='Transfer Seller';
+                        if($row->noresi==null){
+                            $row->statusparse="waiting-delivery";
+                            $row->statusparsestr="Menunggu Pengiriman";
                         }
                         else{
-                            $row->statusparse='completed';
-                            $row->statusparsestr='Selesai';
+                            if($row->receive_at==null){
+                                $row->statusparse="on-delivery";
+                                $row->statusparsestr="Dalam Pengiriman";
+                            }
+                            elseif($row->is_receive_ok){
+                                if(!$row->item_payment->istransfered){
+                                    $row->statusparse='transfer-seller';
+                                    $row->statusparsestr='Selesai';
+                                }
+                                else{
+                                    $row->statusparse='completed';
+                                    $row->statusparsestr='Completed';
+                                }
+                            }
+                            else{
+                                $row->statusparse='trouble-delivery';
+                                $row->statusparsestr='Pengiriman Bermasalah';
+                            }
                         }
                     }
                 }

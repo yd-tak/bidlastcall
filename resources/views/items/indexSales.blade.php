@@ -28,9 +28,12 @@
                                 <option value="Open Bid">Open Bid</option>
                                 <option value="Menunggu Pembayaran">Menunggu Pembayaran</option>
                                 <option value="Review Pembayaran">Review Pembayaran</option>
-                                <option value="Transfer ke Seller">Transfer ke Seller</option>
+                                <option value="Menunggu Pengiriman">Menunggu Pengiriman dari Seller</option>
+                                <option value="Dalam Pengiriman">Dalam Pengiriman</option>
                                 <option value="Selesai">Selesai</option>
+                                <option value="Completed">Completed</option>
                                 <option value="Tidak Terjual">Tidak Terjual</option>
+                                <option value="Pengiriman Bermasalah">Pengiriman Bermasalah</option>
                             </select>
                         </div>
                         <table class="table-borderless table-striped" aria-describedby="mydesc" id="table_list"

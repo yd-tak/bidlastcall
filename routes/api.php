@@ -66,6 +66,8 @@ Route::group(['middleware' => ['auth:sanctum']], static function () {
 
     Route::get('get-item-detail', [ApiController::class, 'getItemDetail']);//item detail dengan bid winner dan payment
     Route::post('pay-item',[ApiController::class,'payItem']);
+    Route::post('send-item',[ApiController::class,'sendItem']);
+    Route::post('receive-item',[ApiController::class,'receiveItem']);
 
 });
 

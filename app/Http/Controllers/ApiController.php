@@ -469,6 +469,33 @@ class ApiController extends Controller {
         $pgs=Pg::get();
         ResponseService::successResponse("PG List", $pgs);
     }
+    public function sendItem(Request $request){
+        $this->checkBlock();
+        try {
+            $validator = Validator::make($request->all(), [
+                'item_id' => 'required',
+                'noresi' => 'required',
+                'send_at' => 'required'
+            ]);
+            if ($validator->fails()) {
+                ResponseService::validationError($validator->errors()->first());
+            }
+
+            DB::beginTransaction();
+            
+            Item::where('id',$request->item_id)->update([
+                'noresi'=>$request->noresi,
+                'send_at'=>$request->send_at
+            ]);
+            DB::commit();
+
+            ResponseService::successResponse("Pengiriman diproses", 1);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            ResponseService::errorResponse($e->getMessage());
+        }
+    }
     public function payItem(Request $request){
         $this->checkBlock();
         try {
@@ -2019,6 +2046,7 @@ class ApiController extends Controller {
                     'bidstatus'=>'closed'
                 ]);
             }
+            $bidHistories=Item::parseStatus($bidHistories);
             ResponseService::successResponse("Bid History Fetched", $bidHistories);
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);
@@ -2091,6 +2119,7 @@ class ApiController extends Controller {
                     $open[]=$row;
                 }
             }
+            $all=Item::parseStatus($all);
             ResponseService::successResponse("Sell History Fetched", [
                 'all'=>$all,
                 'open'=>$open,
