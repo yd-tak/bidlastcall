@@ -618,8 +618,9 @@ class ApiController extends Controller {
             
             $updateItem=[];
             if($now>$extendlimitdt){
+                $diffSeconds = (new \DateTime())->getTimestamp() - $bidtimelimitdt->getTimestamp();
                 $newtimelimitdt=new \DateTime($item->time_limit);
-                $newtimelimitdt->modify("+5 minute");
+                $newtimelimitdt->modify("+".$diffSeconds." second");
                 $item->time_limit=$newtimelimitdt->format("Y-m-d H:i:s");
                 $updateItem['enddt']=$item->time_limit;
             }
@@ -755,6 +756,7 @@ class ApiController extends Controller {
 
             $data = [
                 ...$request->all(),
+                'ori_enddt'=>$request->enddt,
                 'name'       => $request->name, // Store name in uppercase
                 // 'slug'       => HelperService::generateUniqueSlug(new Item(), $request->input('slug')),
                 'status'     => "review", //review,approve,reject

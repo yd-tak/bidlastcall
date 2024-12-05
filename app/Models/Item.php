@@ -22,6 +22,7 @@ class Item extends Model {
         'price',
         'startdt',
         'enddt',
+        'ori_enddt',
         'bidstatus',
         'winnerbidid',
         'minbid',
