@@ -607,7 +607,7 @@ class ApiController extends Controller {
             $user = Auth::user();
             $now=date("Y-m-d H:i:s");
             $bidtimelimitdt=new \DateTime($item->time_limit);
-            $bidtimelimitdt->modify("-1 minute");
+            $bidtimelimitdt->modify("-5 minute");
             $extendlimitdt=$bidtimelimitdt->format("Y-m-d H:i:s");
             if($now>$item->time_limit){
                 throw new \Exception("Tidak dapat memasang bid, waktu BID sudah HABIS");
@@ -619,8 +619,8 @@ class ApiController extends Controller {
             $updateItem=[];
             if($now>$extendlimitdt){
                 $newtimelimitdt=new \DateTime($item->time_limit);
-                $newtimelimitdt->modify("+1 minute");
-                $item->time_limit=$newtimelimitdt->format("Y-m-d");
+                $newtimelimitdt->modify("+5 minute");
+                $item->time_limit=$newtimelimitdt->format("Y-m-d H:i:s");
                 $updateItem['enddt']=$item->time_limit;
             }
             $item->last_price=$request->bid_price;
