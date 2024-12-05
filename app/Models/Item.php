@@ -141,7 +141,7 @@ class Item extends Model {
                             $row->statusparse="on-delivery";
                             $row->statusparsestr="Dalam Pengiriman";
                         }
-                        elseif($row->is_receive_ok){
+                        elseif($row->is_receive_ok===1){
                             if(!$row->item_payment->istransfered){
                                 $row->statusparse='transfer-seller';
                                 $row->statusparsestr='Selesai';
