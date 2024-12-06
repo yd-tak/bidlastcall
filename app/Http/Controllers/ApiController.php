@@ -617,9 +617,11 @@ class ApiController extends Controller {
             }
             
             $updateItem=[];
-            if($now>$extendlimitdt){
+            // if($now>$extendlimitdt){
+            if(true){
                 $diffSeconds = (new \DateTime())->getTimestamp() - $bidtimelimitdt->getTimestamp();
                 $newtimelimitdt=new \DateTime($item->time_limit);
+                $diffSeconds=300;
                 $newtimelimitdt->modify("+".$diffSeconds." second");
                 $item->time_limit=$newtimelimitdt->format("Y-m-d H:i:s");
                 $updateItem['enddt']=$item->time_limit;
