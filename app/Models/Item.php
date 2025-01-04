@@ -149,7 +149,7 @@ class Item extends Model {
                             }
                             else{
                                 $row->statusparse='completed';
-                                $row->statusparsestr='Completed';
+                                $row->statusparsestr='Selesai';
                             }
                         }
                         else{

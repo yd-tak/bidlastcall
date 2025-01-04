@@ -2075,15 +2075,25 @@ class ApiController extends Controller {
                 ]);
             }
             $bidHistories=Item::parseStatus($bidHistories);
-            $returns=['all'=>[],'open-bid'=>[],'win'=>[],'lose'=>[],'waiting-payment'=>[],'review-payment'=>[],'waiting-delivery'=>[],'on-delivery'=>[],'transfer-seller'=>[],'completed'=>[],'trouble-delivery'=>[],'not-sold'=>[]];
+            $returns=['all'=>[],'open-bid'=>[],'close-bid'=>[],'win'=>[],'completed'=>[],'complain'=>[],'lose'=>[]];
             foreach($bidHistories as $row){
                 $returns['all'][]=$row;
-                $returns[$row->statusparse][]=$row;
-                if($row->iswinner && $row->bidstatus=='closed'){
+                if($row->bidstatus=='closed' && !$row->iswinner){
+                    $returns['lose'][]=$row;
+                }
+                elseif($row->bidstatus=='closed' && $row->iswinner){
                     $returns['win'][]=$row;
                 }
-                elseif($row->bidstatus=='closed'){
-                    $returns['lose'][]=$row;
+                if($row->bidstatus=='open'){
+                    $returns['open-bid'][]=$row;
+                }
+                if($row->bidstatus=='closed'){
+                    $returns['close-bid'][]=$row;
+                }
+                switch($row->statusparse){
+                    case 'transfer-seller':$returns['completed'][]=$row;break;
+                    case 'completed':$returns['completed'][]=$row;break;
+                    case 'trouble-delivery':$returns['complain'][]=$row;break;
                 }
             }
             ResponseService::successResponse("Bid History Fetched", $returns);
