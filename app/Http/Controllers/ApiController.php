@@ -728,7 +728,7 @@ class ApiController extends Controller {
                 $itemdb->enddt=$updateItem['enddt'];
             }
             $updateItem['bidstatus']='closed';
-
+            var_dump($updateItem);exit;
             $itemdb->save($updateItem);
             
             $item->status='closed';
