@@ -2123,7 +2123,8 @@ class ApiController extends Controller {
                     'bidstatus'=>'closed'
                 ]);
             }
-
+            $buys=Item::parseStatus($buys);
+            $sells=Item::parseStatus($sells);
             ResponseService::successResponse("My Auction Fetched", ['buys'=>$buys,'sells'=>$sells]);
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);
