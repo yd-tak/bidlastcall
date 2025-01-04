@@ -373,6 +373,9 @@ class ApiController extends Controller {
     }
     private function getOngkir($origin,$destination,$weight){
         $weight=$weight*1000;
+        if($weight==0){
+            $weight=1000;
+        }
         $curl = curl_init();
         $postfields="origin=".$origin."&originType=subdistrict&destination=".$destination."&destinationType=subdistrict&weight=".$weight."&courier=jne:pos:tiki";
         // echo "postfileds = ".$postfields;
