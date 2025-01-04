@@ -604,9 +604,9 @@ class ApiController extends Controller {
         $now=new \DateTime();
         $now->modify("+100 second");
         DB::beginTransaction();
-        $itemdb=Item::where('id',$request->item_id)->first();
-        var_dump($itemdb);exit;
-        $itemdb->save(['enddt'=>$now->format("Y-m-d H:i:s")]);
+        echo $request->item_id;exit;
+        Item::where('id',$request->item_id)->update(['enddt'=>$now->format("Y-m-d H:i:s")]);
+        // var_dump($itemdb);exit;
 
         $filepath=public_path('items/'.$request->item_id.'.json');
         $itemfile=file_get_contents($filepath);
