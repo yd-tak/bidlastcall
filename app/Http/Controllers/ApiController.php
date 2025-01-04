@@ -590,8 +590,9 @@ class ApiController extends Controller {
                 'shippingservice'=>$request->shippingservice,
                 'totalcloseprice'=>$totalcloseprice
             ]);
-            Item::closeItem($request->item_id);
             DB::commit();
+            Item::closeItem($request->item_id);
+            
 
             ResponseService::successResponse("Payment Success", $item_payment);
             
@@ -728,14 +729,14 @@ class ApiController extends Controller {
             $updateItem['bidstatus']='closed';
 
             $itemdb->save($updateItem);
+            
             $item->status='closed';
             $item->bidder_uname=$user->buyer_uname;
             $file=fopen($filepath,"w");
             fwrite($file,json_encode($item));
             fclose($file);
-            
-            Item::closeItem($request->item_id);
             DB::commit();
+            Item::closeItem($request->item_id);
 
             ResponseService::successResponse("Bid Success", $item);
             
