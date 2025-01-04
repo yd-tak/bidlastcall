@@ -603,6 +603,7 @@ class ApiController extends Controller {
     public function setWarningTimeItem(Request $request){
         $now=new \DateTime();
         $now->modify("+100 second");
+        DB::beginTransaction();
         $itemdb=Item::where('id',$request->item_id)->first();
         $itemdb->save(['enddt'=>$now->format("Y-m-d H:i:s")]);
 
@@ -616,6 +617,8 @@ class ApiController extends Controller {
         $file=fopen($filepath,"w");
         fwrite($file,json_encode($item));
         fclose($file);
+        DB::commit();
+        
         ResponseService::successResponse("Set Warning Success", $item);
 
     }
