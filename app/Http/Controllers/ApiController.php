@@ -612,6 +612,7 @@ class ApiController extends Controller {
         $item->time_limit=$now->format("Y-m-d H:i:s");
         $item->status='open';
 
+        $filepath=public_path('items/'.$request->item_id.'.json');
         $file=fopen($filepath,"w");
         fwrite($file,json_encode($item));
         fclose($file);
