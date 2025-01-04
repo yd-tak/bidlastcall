@@ -600,6 +600,23 @@ class ApiController extends Controller {
             ResponseService::errorResponse($e->getMessage());
         }
     }
+    public function setWarningTimeItem(Request $request){
+        $now=new \DateTime();
+        $now->modify("+100 second");
+        Item::where('id',$request->item_id)->save(['enddt'=>$now->format("Y-m-d H:i:s")]);
+
+        $filepath=public_path('items/'.$request->item_id.'.json');
+        $itemfile=file_get_contents($filepath);
+        $item=json_decode($itemfile);
+        $item->time_limit=$now->format("Y-m-d H:i:s");
+        $item->status='open';
+
+        $file=fopen($filepath,"w");
+        fwrite($file,json_encode($item));
+        fclose($file);
+        ResponseService::successResponse("Set Warning Success", $item);
+
+    }
     public function bidItem(Request $request){
         $this->checkBlock();
         try {
@@ -2040,67 +2057,58 @@ class ApiController extends Controller {
             ResponseService::errorResponse();
         }
     }
+
     public function getMyAuction(Request $request) {
         $this->checkBlock();
         try {
             $user = Auth::user();
+            $now=new \DateTime();
             $sql = Item::selectRaw('items.*,max(ib.bid_price) as my_bid_price,winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_payment')
             ->join('item_bids as ib','ib.item_id','=','items.id')->where('ib.user_id',$user->id)
             ->leftJoin('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
+            ->where('items.bidstatus','open')
             ->orderBy('ib.created_at','desc')
             ->groupBy('items.id')
             ->get();
-            $bidHistories=[];
+
+            $buys=[];
             $close_itemids=[];
-            $open_itemids=[];
             foreach($sql as $row){
-                if($row->my_bid_price==$row->winner_bid_price){
-                    $row->iswinner=true;
-                }
-                else{
-                    $row->iswinner=false;
-                }
-                $now=new \DateTime();
                 $enddt=new \DateTime($row->enddt);
-                if($enddt<$now && $row->bidstatus=='open'){
+                if($enddt<$now){
                     $row->bidstatus='closed';
                     $close_itemids[]=$row->id;
                 }
-                $bidHistories[]=$row;
+                else{
+                    $buys[]=$row;
+                }
             }
-            if(!empty($open_itemids)){
-                Item::whereIn('id',$open_itemids)->update([
-                    'bidstatus'=>'open'
-                ]);
+
+            $sql = Item::select('items.*','winnerib.bid_price as winner_bid_price','winnerib.user_id as winner_id')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_payment')
+            ->leftJoin('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
+            ->where('items.user_id',$user->id)
+            ->where('items.bidstatus','open')
+            ->orderBy('items.created_at','desc')
+            ->get();
+            
+            foreach($sql as $row){
+                $enddt=new \DateTime($row->enddt);
+                if($enddt<$now){
+                    $row->bidstatus='closed';
+                    $close_itemids[]=$row->id;
+                }
+                else{
+                    $sells[]=$row;
+                }
             }
+            
             if(!empty($close_itemids)){
                 Item::whereIn('id',$close_itemids)->update([
                     'bidstatus'=>'closed'
                 ]);
             }
-            $bidHistories=Item::parseStatus($bidHistories);
-            $returns=['all'=>[],'open-bid'=>[],'close-bid'=>[],'win'=>[],'completed'=>[],'complain'=>[],'lose'=>[]];
-            foreach($bidHistories as $row){
-                $returns['all'][]=$row;
-                if($row->bidstatus=='closed' && !$row->iswinner){
-                    $returns['lose'][]=$row;
-                }
-                elseif($row->bidstatus=='closed' && $row->iswinner && $row->user_id!=$user->id){//self win gak masuk buyer history
-                    $returns['win'][]=$row;
-                }
-                if($row->bidstatus=='open'){
-                    $returns['open-bid'][]=$row;
-                }
-                if($row->bidstatus=='closed' && $row->user_id!=$user->id){//self win gak masuk buyer history
-                    $returns['close-bid'][]=$row;
-                }
-                switch($row->statusparse){
-                    case 'transfer-seller':$returns['completed'][]=$row;break;
-                    case 'completed':$returns['completed'][]=$row;break;
-                    case 'trouble-delivery':$returns['complain'][]=$row;break;
-                }
-            }
-            ResponseService::successResponse("Bid History Fetched", $returns);
+
+            ResponseService::successResponse("My Auction Fetched", ['buys'=>$buys,'sells'=>$sells]);
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);
             ResponseService::errorResponse();

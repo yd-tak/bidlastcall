@@ -100,6 +100,7 @@ Route::get('areas', [ApiController::class, 'getAreas']);
 Route::post('contact-us', [ApiController::class, 'storeContactUs']);
 
 Route::get('close-items', [ApiController::class, 'cronCloseItems']);
+Route::post('set-warning-time-item', [ApiController::class, 'setWarningTimeItem']);
 
 
 
