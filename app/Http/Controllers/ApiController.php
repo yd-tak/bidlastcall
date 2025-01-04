@@ -728,7 +728,7 @@ class ApiController extends Controller {
                 $itemdb->enddt=$updateItem['enddt'];
             }
             $updateItem['bidstatus']='closed';
-            var_dump($updateItem);exit;
+
             $itemdb->save($updateItem);
             
             $item->status='closed';
@@ -737,6 +737,7 @@ class ApiController extends Controller {
             fwrite($file,json_encode($item));
             fclose($file);
             DB::commit();
+            var_dump($updateItem);exit;
             Item::closeItem($request->item_id);
 
             ResponseService::successResponse("Bid Success", $item);
