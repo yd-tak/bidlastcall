@@ -79,6 +79,15 @@ class Item extends Model {
             $item->bidstatus='closed';
             
         }
+        if($item->bidstatus=='open' && $item->winnerbidid!=null){
+            $winnerbid=ItemBid::where('id',$item->winnerbidid)->first();
+            if($winnerbid->tipe=='buy'){
+                $updateData['bidstatus']='closed';
+                $item->bidstatus='closed';
+            }
+            
+            
+        }
         if($item->bidstatus=='closed' && $item->winnerbidid!=null){
             $expire_payment_at=new \DateTime($item->enddt);
             $expire_payment_at->modify("+2 hour");
