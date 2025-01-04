@@ -2077,11 +2077,12 @@ class ApiController extends Controller {
             $buys=[];
             $sells=[];
             $close_itemids=[];
-            
+
             $sql = Item::selectRaw('items.*,max(ib.bid_price) as my_bid_price,winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_payment')
             ->join('item_bids as ib','ib.item_id','=','items.id')->where('ib.user_id',$user->id)
             ->leftJoin('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
             ->where('items.bidstatus','open')
+            ->where('items.status','approved')
             ->orderBy('ib.created_at','desc')
             ->groupBy('items.id')
             ->get();
@@ -2102,6 +2103,7 @@ class ApiController extends Controller {
             ->leftJoin('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
             ->where('items.user_id',$user->id)
             ->where('items.bidstatus','open')
+            ->where('items.status','approved')
             ->orderBy('items.created_at','desc')
             ->get();
             
