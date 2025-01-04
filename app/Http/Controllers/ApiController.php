@@ -603,7 +603,8 @@ class ApiController extends Controller {
     public function setWarningTimeItem(Request $request){
         $now=new \DateTime();
         $now->modify("+100 second");
-        Item::where('id',$request->item_id)->save(['enddt'=>$now->format("Y-m-d H:i:s")]);
+        $itemdb=Item::where('id',$request->item_id)->first();
+        $itemdb->save(['enddt'=>$now->format("Y-m-d H:i:s")]);
 
         $filepath=public_path('items/'.$request->item_id.'.json');
         $itemfile=file_get_contents($filepath);
