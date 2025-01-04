@@ -2081,13 +2081,13 @@ class ApiController extends Controller {
                 if($row->bidstatus=='closed' && !$row->iswinner){
                     $returns['lose'][]=$row;
                 }
-                elseif($row->bidstatus=='closed' && $row->iswinner){
+                elseif($row->bidstatus=='closed' && $row->iswinner && $row->user_id!=$user->id){//self win gak masuk buyer history
                     $returns['win'][]=$row;
                 }
                 if($row->bidstatus=='open'){
                     $returns['open-bid'][]=$row;
                 }
-                if($row->bidstatus=='closed'){
+                if($row->bidstatus=='closed' && $row->user_id!=$user->id){//self win gak masuk buyer history
                     $returns['close-bid'][]=$row;
                 }
                 switch($row->statusparse){
@@ -2114,12 +2114,17 @@ class ApiController extends Controller {
             // ->where('items.enddt','>=',date("Y-m-d H:i:s"))
             ->orderBy('items.created_at','desc')
             ->get();
+            $returns=[];
+            $waitingPayments=[];
             $close_itemids=[];
             foreach($sql as $row){
-                if($row->bidstatus=='open'){
+                $now=new \DateTime();
+                $enddt=new \DateTime($row->enddt);
+                if($enddt<$now && $row->bidstatus=='open'){
                     $row->bidstatus='closed';
                     $close_itemids[]=$row->id;
                 }
+                $waitingPayments[]=$row;
             }
             if(!empty($close_itemids)){
                 Item::whereIn('id',$close_itemids)->update([
@@ -2127,7 +2132,12 @@ class ApiController extends Controller {
                 ]);
             }
             
-            ResponseService::successResponse("Waiting Payment Fetched", $sql);
+            foreach($waitingPayments as $row){
+                if($row->user_id!=$user->id){//self win tidak masuk waiting payment
+                    $returns[]=$row;
+                }
+            }
+            ResponseService::successResponse("Waiting Payment Fetched", $returns);
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);
             ResponseService::errorResponse();
@@ -2137,7 +2147,7 @@ class ApiController extends Controller {
         $this->checkBlock();
         try {
             $user = Auth::user();
-            $sql = Item::select('items.*','winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_payment')
+            $sql = Item::select('items.*','winnerib.bid_price as winner_bid_price','winnerib.user_id as winner_id')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_payment')
             ->leftJoin('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
             ->where('items.user_id',$user->id)
             ->orderBy('items.created_at','desc')
@@ -2176,10 +2186,10 @@ class ApiController extends Controller {
                 $row->haswinner=$haswinner;
 
                 $returns['all'][]=$row;
-                if($row->bidstatus=='closed' && !$row->haswinner){
+                if($row->bidstatus=='closed' && (!$row->haswinner || $row->winner_id==$user->id)){//self win masuk sebagai not-sold
                     $returns['not-sold'][]=$row;
                 }
-                elseif($row->bidstatus=='closed' && $row->haswinner){
+                elseif($row->bidstatus=='closed' && $row->haswinner && $row->winner_id!=$user->id){
                     $returns['sold'][]=$row;
                 }
 
