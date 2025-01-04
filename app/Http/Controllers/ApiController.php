@@ -2073,6 +2073,11 @@ class ApiController extends Controller {
         try {
             $user = Auth::user();
             $now=new \DateTime();
+
+            $buys=[];
+            $sells=[];
+            $close_itemids=[];
+            
             $sql = Item::selectRaw('items.*,max(ib.bid_price) as my_bid_price,winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_payment')
             ->join('item_bids as ib','ib.item_id','=','items.id')->where('ib.user_id',$user->id)
             ->leftJoin('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
@@ -2081,8 +2086,7 @@ class ApiController extends Controller {
             ->groupBy('items.id')
             ->get();
 
-            $buys=[];
-            $close_itemids=[];
+
             foreach($sql as $row){
                 $enddt=new \DateTime($row->enddt);
                 if($enddt<$now){
