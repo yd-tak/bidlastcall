@@ -605,6 +605,7 @@ class ApiController extends Controller {
         $now->modify("+100 second");
         DB::beginTransaction();
         $itemdb=Item::where('id',$request->item_id)->first();
+        var_dump($itemdb);exit;
         $itemdb->save(['enddt'=>$now->format("Y-m-d H:i:s")]);
 
         $filepath=public_path('items/'.$request->item_id.'.json');
@@ -618,7 +619,7 @@ class ApiController extends Controller {
         fwrite($file,json_encode($item));
         fclose($file);
         DB::commit();
-        
+
         ResponseService::successResponse("Set Warning Success", $item);
 
     }
