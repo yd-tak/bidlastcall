@@ -604,7 +604,7 @@ class ApiController extends Controller {
         $now=new \DateTime();
         $now->modify("+100 second");
         DB::beginTransaction();
-        echo $request->item_id;exit;
+        // echo $request->item_id;exit;
         Item::where('id',$request->item_id)->update(['enddt'=>$now->format("Y-m-d H:i:s")]);
         // var_dump($itemdb);exit;
 
