@@ -609,8 +609,9 @@ class ApiController extends Controller {
             $item=json_decode($itemfile);
             $user = Auth::user();
             $now=date("Y-m-d H:i:s");
+            $timelimitsecond=90;
             $bidtimelimitdt=new \DateTime($item->time_limit);
-            $bidtimelimitdt->modify("-90 second");
+            $bidtimelimitdt->modify("-$timelimitsecond second");
             $extendlimitdt=$bidtimelimitdt->format("Y-m-d H:i:s");
             if($now>$item->time_limit){
                 throw new \Exception("Tidak dapat memasang bid, waktu BID sudah HABIS");
@@ -620,11 +621,11 @@ class ApiController extends Controller {
             }
             
             $updateItem=[];
-            // if($now>$extendlimitdt){
-            if(true){
+            if($now>$extendlimitdt){
+            // if(true){
                 $diffSeconds = (new \DateTime())->getTimestamp() - $bidtimelimitdt->getTimestamp();
                 $newtimelimitdt=new \DateTime($item->time_limit);
-                $diffSeconds=300;
+                // $diffSeconds=300;
                 $newtimelimitdt->modify("+".$diffSeconds." second");
                 $item->time_limit=$newtimelimitdt->format("Y-m-d H:i:s");
                 $updateItem['enddt']=$item->time_limit;
@@ -2036,6 +2037,72 @@ class ApiController extends Controller {
 
         } catch (Throwable $th) {
             ResponseService::logErrorResponse($th, 'API Controller -> storeContactUs');
+            ResponseService::errorResponse();
+        }
+    }
+    public function getMyAuction(Request $request) {
+        $this->checkBlock();
+        try {
+            $user = Auth::user();
+            $sql = Item::selectRaw('items.*,max(ib.bid_price) as my_bid_price,winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_payment')
+            ->join('item_bids as ib','ib.item_id','=','items.id')->where('ib.user_id',$user->id)
+            ->leftJoin('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
+            ->orderBy('ib.created_at','desc')
+            ->groupBy('items.id')
+            ->get();
+            $bidHistories=[];
+            $close_itemids=[];
+            $open_itemids=[];
+            foreach($sql as $row){
+                if($row->my_bid_price==$row->winner_bid_price){
+                    $row->iswinner=true;
+                }
+                else{
+                    $row->iswinner=false;
+                }
+                $now=new \DateTime();
+                $enddt=new \DateTime($row->enddt);
+                if($enddt<$now && $row->bidstatus=='open'){
+                    $row->bidstatus='closed';
+                    $close_itemids[]=$row->id;
+                }
+                $bidHistories[]=$row;
+            }
+            if(!empty($open_itemids)){
+                Item::whereIn('id',$open_itemids)->update([
+                    'bidstatus'=>'open'
+                ]);
+            }
+            if(!empty($close_itemids)){
+                Item::whereIn('id',$close_itemids)->update([
+                    'bidstatus'=>'closed'
+                ]);
+            }
+            $bidHistories=Item::parseStatus($bidHistories);
+            $returns=['all'=>[],'open-bid'=>[],'close-bid'=>[],'win'=>[],'completed'=>[],'complain'=>[],'lose'=>[]];
+            foreach($bidHistories as $row){
+                $returns['all'][]=$row;
+                if($row->bidstatus=='closed' && !$row->iswinner){
+                    $returns['lose'][]=$row;
+                }
+                elseif($row->bidstatus=='closed' && $row->iswinner && $row->user_id!=$user->id){//self win gak masuk buyer history
+                    $returns['win'][]=$row;
+                }
+                if($row->bidstatus=='open'){
+                    $returns['open-bid'][]=$row;
+                }
+                if($row->bidstatus=='closed' && $row->user_id!=$user->id){//self win gak masuk buyer history
+                    $returns['close-bid'][]=$row;
+                }
+                switch($row->statusparse){
+                    case 'transfer-seller':$returns['completed'][]=$row;break;
+                    case 'completed':$returns['completed'][]=$row;break;
+                    case 'trouble-delivery':$returns['complain'][]=$row;break;
+                }
+            }
+            ResponseService::successResponse("Bid History Fetched", $returns);
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e);
             ResponseService::errorResponse();
         }
     }
