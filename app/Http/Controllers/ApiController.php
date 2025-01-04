@@ -426,7 +426,7 @@ class ApiController extends Controller {
         try{
 
             Item::closeItem($request->item_id);
-            echo "EXIT";
+            // echo "EXIT";
             $item=Item::with('user:id,seller_uname,subdistrictid','item_bid:id,user_id,bid_amount,bid_price,tipe,created_at','item_payment','category:id,name,image', 'gallery_images:id,image,item_id')->where('id',$request->item_id)->first();
             // var_dump($item);exit;
 
