@@ -2146,31 +2146,54 @@ class ApiController extends Controller {
             $open=[];
             $closed=[];
             $now=new \DateTime();
-            $returns=['all'=>[],'open-bid'=>[],'waiting-payment'=>[],'review-payment'=>[],'waiting-delivery'=>[],'on-delivery'=>[],'transfer-seller'=>[],'completed'=>[],'trouble-delivery'=>[],'not-sold'=>[]];
+
+            $close_itemids=[];
+            foreach($sql as $row){
+                $enddt=new \DateTime($row->enddt);
+                if($enddt<$now && $row->bidstatus=='open'){
+                    $row->bidstatus='closed';
+                    $close_itemids[]=$row->id;
+                }
+            }
+            if(!empty($close_itemids)){
+                Item::whereIn('id',$close_itemids)->update([
+                    'bidstatus'=>'closed'
+                ]);
+            }
+
+            $returns=['all'=>[],'open-bid'=>[],'close-bid'=>[],'sold'=>[],'not-sold'=>[],'bid-run'=>[],'completed'=>[],'complain'=>[]];
             $sql=Item::parseStatus($sql);
+
             foreach($sql as $row){
                 $haswinner=false;
                 $hasclosed=false;
                 $enddt=new \DateTime($row->enddt);
-                if($row->bidstatus=='open' && $enddt>$now){
-                    $hasclosed=false;
-                }
-                elseif($row->bidstatus=='closed'){
-                    $hasclosed=true;
-                }
-                elseif($row->bidstatus=='open' && $enddt<$now){
-                    $hasclosed=true;
-                }
-                if($hasclosed){
+                if($row->bidstatus=='closed'){
                     if($row->winner_bid_price!=null){
                         $haswinner=true;
                     }
                 }
                 $row->haswinner=$haswinner;
-                $row->hasclosed=$hasclosed;
-                
+
                 $returns['all'][]=$row;
-                $returns[$row->statusparse][]=$row;
+                if($row->bidstatus=='closed' && !$row->haswinner){
+                    $returns['not-sold'][]=$row;
+                }
+                elseif($row->bidstatus=='closed' && $row->haswinner){
+                    $returns['sold'][]=$row;
+                }
+
+                if($row->bidstatus=='open'){
+                    $returns['open-bid'][]=$row;
+                }
+                if($row->bidstatus=='closed'){
+                    $returns['close-bid'][]=$row;
+                }
+                switch($row->statusparse){
+                    case 'transfer-seller':$returns['completed'][]=$row;break;
+                    case 'completed':$returns['completed'][]=$row;break;
+                    case 'trouble-delivery':$returns['complain'][]=$row;break;
+                }
             }
             
             ResponseService::successResponse("Sell History Fetched", $returns);
