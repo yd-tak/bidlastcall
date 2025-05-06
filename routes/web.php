@@ -178,9 +178,7 @@ Route::group(['middleware' => ['auth', 'language']], static function () {
     /*** User Module : END ***/
 
     /*** Customer Module : START ***/
-    Route::group(['prefix' => 'customer'], static function () {
-        Route::post('/assign-package', [CustomersController::class, 'assignPackage'])->name('customer.assign.package');
-    });
+    
     Route::resource('customer', CustomersController::class);
 
 

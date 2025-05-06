@@ -2200,6 +2200,8 @@ class ApiController extends Controller {
     public function getWaitingPayment(Request $request) {
         $this->checkBlock();
         try {
+            DB::enableQueryLog();
+
             $user = Auth::user();
             $sql = Item::select('items.*','winnerib.bid_price as winner_bid_price')->with('user:id,seller_uname,name,email,mobile,profile,created_at', 'category:id,name,image', 'gallery_images:id,image,item_id', 'featured_items', 'favourites', 'item_custom_field_values.custom_field', 'area:id,name','item_payment')
             ->join('item_bids as winnerib','items.winnerbidid','=','winnerib.id')
@@ -2209,6 +2211,11 @@ class ApiController extends Controller {
             // ->where('items.enddt','>=',date("Y-m-d H:i:s"))
             ->orderBy('items.created_at','desc')
             ->get();
+            // var_dump($sql);exit;
+            $query = DB::getQueryLog();
+
+            // dd($query);
+
             $returns=[];
             $waitingPayments=[];
             $close_itemids=[];
@@ -2221,6 +2228,7 @@ class ApiController extends Controller {
                 }
                 $waitingPayments[]=$row;
             }
+            // pre($waitingPayments);
             if(!empty($close_itemids)){
                 Item::whereIn('id',$close_itemids)->update([
                     'bidstatus'=>'closed'

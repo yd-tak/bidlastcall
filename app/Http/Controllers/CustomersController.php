@@ -17,17 +17,17 @@ use Throwable;
 class CustomersController extends Controller {
     public function index() {
         ResponseService::noAnyPermissionThenRedirect(['customer-list', 'customer-update']);
-        $packages = Package::all()->where('status', 1);
+        // $packages = Package::all()->where('status', 1);
 
-        $itemListingPackage = $packages->filter(function ($data) {
-            return $data->type == "item_listing";
-        });
+        // $itemListingPackage = $packages->filter(function ($data) {
+        //     return $data->type == "item_listing";
+        // });
 
-        $advertisementPackage = $packages->filter(function ($data) {
-            return $data->type == "advertisement";
-        });
+        // $advertisementPackage = $packages->filter(function ($data) {
+        //     return $data->type == "advertisement";
+        // });
 
-        return view('customer.index', compact('packages', 'itemListingPackage', 'advertisementPackage'));
+        return view('customer.index');
     }
 
     public function update(Request $request) {
@@ -84,23 +84,19 @@ class CustomersController extends Controller {
                 }
             }
 
-            $tempRow['operate'] = BootstrapTableService::button(
-                'fa fa-cart-plus',
-                route('customer.assign.package', $row->id),
-                ['btn-outline-danger', 'assign_package'],
-                [
-                    'title'          => __("Assign Package"),
-                    "data-bs-target" => "#assignPackageModal",
-                    "data-bs-toggle" => "modal"
-                ]
-            );
+            $tempRow['operate'] = BootstrapTableService::deleteButton(route('customer.destroy', $row->id));
             $rows[] = $tempRow;
         }
 
         $bulkData['rows'] = $rows;
         return response()->json($bulkData);
     }
+    public function destroy($id){
+        $user=User::find($id);
+        $user->forceDelete();
 
+        ResponseService::successResponse('User deleted successfully');
+    }
     public function assignPackage(Request $request) {
         $validator = Validator::make($request->all(), [
             'package_id'      => 'required',
